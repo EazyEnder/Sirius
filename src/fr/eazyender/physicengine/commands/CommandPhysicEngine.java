@@ -60,12 +60,25 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				}
 				
 				
-			}else {
-				p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create}");
+			}else if(args[0].equalsIgnoreCase("pause")) {
+				if(PhysicEngine.isPaused) {
+					p.sendMessage(prefix+"La simulation est déjà en pause. Faites /"+command_name+" resume ,pour relancer la simulation.");
+				}else {
+					PhysicEngine.isPaused = true;
+				}
+			}else if(args[0].equalsIgnoreCase("resume")) {
+				if(!PhysicEngine.isPaused) {
+					p.sendMessage(prefix+"La simulation est déjà en route. Faites /"+command_name+" pause ,pour mettre en pause la simulation.");
+				}else {
+					PhysicEngine.isPaused = false;
+				}
+			}
+			else {
+				p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume}");
 			}
 			
 		}else {
-			p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create}");
+			p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume}");
 		}
 		
 		return false;

@@ -27,6 +27,8 @@ public class PhysicEngine  extends JavaPlugin{
 	
 	private static List<Node> nodes = new CopyOnWriteArrayList<Node>();
 	
+	public static boolean isPaused = false;
+	
 	@Override
 	public void onEnable() 
 	{
@@ -53,13 +55,13 @@ public class PhysicEngine  extends JavaPlugin{
 		if(tps>20)tps=20;
 		if(tps<1)tps=1;
 		dt = 1/(double)tps;
-		System.out.println(dt);
 		tps=21-tps;
 		
 		//Simulation Loop
 		new BukkitRunnable() {
 			public void run() {
 			
+				if(!isPaused)
 				switch(integration) {
 				case VERLET:
 					VerletLoop.update();
