@@ -92,13 +92,17 @@ public class CommandPhysicEngine  implements CommandExecutor {
 					PhysicEngine.isPaused = false;
 					p.sendMessage(prefix+"La simulation a été remise en route.");
 				}
+			}else if(args[0].equalsIgnoreCase("clear")) {
+				PhysicEngine.getConnectors().clear();
+				PhysicEngine.getNodes().clear();
+				p.sendMessage(prefix+"Tous les objets ont été supprimés.");
 			}
 			else {
-				p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume}");
+				p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume/clear}");
 			}
 			
 		}else {
-			p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume}");
+			p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume/clear}");
 		}
 		
 		return false;
