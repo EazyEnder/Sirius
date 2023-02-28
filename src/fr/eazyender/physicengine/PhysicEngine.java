@@ -9,6 +9,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.eazyender.physicengine.commands.CommandPhysicEngine;
+import fr.eazyender.physicengine.links.Connector;
+import fr.eazyender.physicengine.links.RigidConnector;
 import fr.eazyender.physicengine.loops.VerletLoop;
 import fr.eazyender.physicengine.nodes.Node;
 import net.md_5.bungee.api.ChatColor;
@@ -26,6 +28,7 @@ public class PhysicEngine  extends JavaPlugin{
 	public static final String text_prefix = "§r§f§l[" + ChatColor.of(new Color(199, 236, 238)) + "§lSirius§r§f§l] :§r ";
 	
 	private static List<Node> nodes = new CopyOnWriteArrayList<Node>();
+	private static List<Connector> connectors = new CopyOnWriteArrayList<Connector>();
 	
 	public static boolean isPaused = false;
 	
@@ -95,6 +98,10 @@ public class PhysicEngine  extends JavaPlugin{
 	public static List<Node> getNodes(){return nodes;}
 	
 	public static boolean removeNode(Node node) {return nodes.remove(node);}
+	
+	public static List<Connector> getConnectors(){return connectors;}
+	
+	public static void createRidigConnector(RigidConnector connector) {connectors.add(connector);}
 	
 	public static PhysicEngine getPhysicEngine() {
 		return main_instance;

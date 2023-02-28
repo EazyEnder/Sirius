@@ -8,17 +8,21 @@ import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class VerletLoop {
 	
 	private static List<Node> nodes = PhysicEngine.getNodes();
+	private static List<Connector> connectors = PhysicEngine.getConnectors();
+	private static int numberOfConstraintsUpdates = 5;
 	
 	public static void update() {
 		
 		double dt = PhysicEngine.dt;
 		
+		//Update nodes
 		for (Node node : nodes) {
 			
 			if(node.getProperties().getStatic_prop() == Static.ENABLE)continue;
@@ -48,6 +52,13 @@ public class VerletLoop {
 			node.setOldPosition(new Location(node.getPosition().getWorld(), pos.getX(), pos.getY(), pos.getZ()));
 			node.setPosition(new_pos_location);
 			
+		}
+		
+		//Update connectors
+		for(int i = 0; i < numberOfConstraintsUpdates; i++) {
+			for (Connector connector : connectors) {
+				connector.update();
+			}
 		}
 		
 	}
