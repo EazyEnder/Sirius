@@ -13,6 +13,7 @@ import fr.eazyender.physicengine.links.RigidConnector;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class CommandPhysicEngine  implements CommandExecutor {
@@ -54,6 +55,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						NodeProperties props = new NodeProperties();
 						props.setGrav_force(GravitationalForce.ENABLE);
 						props.setStatic_prop(Static.DISABLE);
+						props.setPlayer_collision(PlayerCollision.ENABLE);
 						Node node1 = new Node(node_loc, velocity, 1, props);
 						
 						NodeProperties props2 = new NodeProperties();
@@ -96,13 +98,22 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				PhysicEngine.getConnectors().clear();
 				PhysicEngine.getNodes().clear();
 				p.sendMessage(prefix+"Tous les objets ont été supprimés.");
+			}else if(args[0].equalsIgnoreCase("speed")) {
+				if(args.length > 1) {
+					if(Double.parseDouble(args[1]) > 0) {
+						PhysicEngine.engineSpeed = Double.parseDouble(args[1]);
+						p.sendMessage(prefix+"La vitesse de la simu a été changée à : " + PhysicEngine.engineSpeed + ".");
+					}
+				}else {
+					p.sendMessage(prefix+"Usage : "+command_name+" speed {double}");
+				}
 			}
 			else {
-				p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume/clear}");
+				p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume/clear/speed}");
 			}
 			
 		}else {
-			p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume/clear}");
+			p.sendMessage(prefix+"Usage : "+command_name+" {config/debug/create/pause/resume/clear/speed}");
 		}
 		
 		return false;

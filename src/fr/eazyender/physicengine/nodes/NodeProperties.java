@@ -6,6 +6,7 @@ public class NodeProperties {
 	private GravitationalForce grav_force = GravitationalForce.DISABLE;
 	private DragForce drag_force = DragForce.DISABLE;
 	private Static static_prop = Static.DISABLE;
+	private PlayerCollision player_collision = PlayerCollision.DISABLE;
 	
 	public NodeProperties() {}
 	
@@ -49,9 +50,19 @@ public class NodeProperties {
 		this.drag_force = drag_force;
 	}
 	
+	public PlayerCollision getPlayer_collision() {
+		return player_collision;
+	}
+
+	public void setPlayer_collision(PlayerCollision player_collision) {
+		this.player_collision = player_collision;
+	}
+	
+	
 	
 
 //----------------------------------------------------------
+
 
 	public static enum TriggerSource { 
 		TIMER, BLOCK, ENTITY
@@ -66,6 +77,10 @@ public class NodeProperties {
 	}
 	
 	public static enum Static{
+		ENABLE, DISABLE;
+	}
+	
+	public static enum PlayerCollision {
 		ENABLE, DISABLE;
 	}
 

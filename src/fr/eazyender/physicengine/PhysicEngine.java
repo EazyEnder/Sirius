@@ -31,6 +31,7 @@ public class PhysicEngine  extends JavaPlugin{
 	private static List<Connector> connectors = new CopyOnWriteArrayList<Connector>();
 	
 	public static boolean isPaused = false;
+	public static double engineSpeed = 1;
 	
 	@Override
 	public void onEnable() 

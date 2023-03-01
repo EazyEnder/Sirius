@@ -20,7 +20,7 @@ public class VerletLoop {
 	
 	public static void update() {
 		
-		double dt = PhysicEngine.dt;
+		double dt = PhysicEngine.dt*PhysicEngine.engineSpeed;
 		
 		//Update nodes
 		for (Node node : nodes) {
