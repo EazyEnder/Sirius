@@ -10,6 +10,7 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.DebugMod;
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.links.RigidConnector;
+import fr.eazyender.physicengine.nodes.ChargedNode;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
@@ -49,6 +50,8 @@ public class CommandPhysicEngine  implements CommandExecutor {
 			}else if(args[0].equalsIgnoreCase("create")) {
 				if(args.length > 1) {
 					if(args[1].contentEquals("node")) {
+
+					}else if(args[1].contentEquals("1")) {
 						Location node_loc = p.getLocation();
 						Vector velocity = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize().multiply(3);
 						
@@ -64,16 +67,42 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						Node node2 = new Node(node_loc.clone().add(1,1,0), new Vector(0,0,0), 1, props2);
 						
 						Node node3 = new Node(node_loc.clone().add(-1,-1.25,0), velocity, 1, props);
-						Node node4 = new Node(node_loc.clone().add(-2.5,-2,0), velocity, 1, props);
+						Node node4 = new ChargedNode(node_loc.clone().add(-2.5,-2,0), velocity, 1, props, 1);
 						
 						PhysicEngine.createNode(node1);
 						PhysicEngine.createNode(node2);
 						PhysicEngine.createNode(node3);
 						PhysicEngine.createNode(node4);
 						
-						PhysicEngine.createRidigConnector(new RigidConnector(node1,node2, 0.05 ));
-						PhysicEngine.createRidigConnector(new RigidConnector(node1,node3, 0.05 ));
-						PhysicEngine.createRidigConnector(new RigidConnector(node4,node3, 0.05 ));
+						PhysicEngine.createRigidConnector(new RigidConnector(node1,node2, 0.05 ));
+						PhysicEngine.createRigidConnector(new RigidConnector(node1,node3, 0.05 ));
+						PhysicEngine.createRigidConnector(new RigidConnector(node4,node3, 0.05 ));
+					}else if(args[1].contentEquals("2")) {
+						Location node_loc = p.getLocation();
+						Vector velocity = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize().multiply(3);
+						
+						NodeProperties props = new NodeProperties();
+						props.setGrav_force(GravitationalForce.ENABLE);
+						props.setStatic_prop(Static.DISABLE);
+						props.setPlayer_collision(PlayerCollision.ENABLE);
+						Node node1 = new Node(node_loc, velocity, 1, props);
+						
+						NodeProperties props2 = new NodeProperties();
+						props2.setGrav_force(GravitationalForce.DISABLE);
+						props2.setStatic_prop(Static.ENABLE);
+						Node node2 = new Node(node_loc.clone().add(1,1,0), new Vector(0,0,0), 1, props2);
+						
+						Node node3 = new Node(node_loc.clone().add(-1,-1.25,0), velocity, 1, props);
+						Node node4 = new ChargedNode(node_loc.clone().add(-2.5,-2,0), velocity, 1, props, -1);
+						
+						PhysicEngine.createNode(node1);
+						PhysicEngine.createNode(node2);
+						PhysicEngine.createNode(node3);
+						PhysicEngine.createNode(node4);
+						
+						PhysicEngine.createRigidConnector(new RigidConnector(node1,node2, 0.05 ));
+						PhysicEngine.createRigidConnector(new RigidConnector(node1,node3, 0.05 ));
+						PhysicEngine.createRigidConnector(new RigidConnector(node4,node3, 0.05 ));
 					}
 				}else {
 					p.sendMessage(prefix+"Usage : "+command_name+" create {node}");

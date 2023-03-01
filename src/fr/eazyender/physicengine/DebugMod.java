@@ -10,7 +10,9 @@ import org.bukkit.Particle.DustOptions;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.links.Connector;
+import fr.eazyender.physicengine.nodes.ChargedNode;
 import fr.eazyender.physicengine.nodes.Node;
+import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class DebugMod {
 	
@@ -24,7 +26,12 @@ public class DebugMod {
 		for (Node node : nodes) {
 			
 			World world = node.getPosition().getWorld();
-			Particle.DustOptions dustOptions = new Particle.DustOptions(Color.GREEN, 0.8F);
+			
+			float size = 0.8F;
+			Particle.DustOptions dustOptions = new Particle.DustOptions(Color.GREEN, size);
+			if(node instanceof ChargedNode) dustOptions = new Particle.DustOptions(Color.LIME, size);
+			if(node.getProperties().getStatic_prop() == Static.ENABLE) dustOptions = new Particle.DustOptions(Color.RED, size*1.2F);
+			
 			world.spawnParticle(Particle.REDSTONE, node.getPosition() , 5, 0D, 0D, 0D, 0, dustOptions, true);
 			
 			

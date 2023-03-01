@@ -1,6 +1,9 @@
 package fr.eazyender.physicengine.loops;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,11 +19,18 @@ public class VerletLoop {
 	
 	private static List<Node> nodes = PhysicEngine.getNodes();
 	private static List<Connector> connectors = PhysicEngine.getConnectors();
+	
 	private static int numberOfConstraintsUpdates = 5;
+	
+	private static Map<Node,Location> old_positions = new HashMap<Node,Location>();
+	private static Map<Node,Location> new_positions = new HashMap<Node,Location>();
 	
 	public static void update() {
 		
 		double dt = PhysicEngine.dt*PhysicEngine.engineSpeed;
+		
+		old_positions.clear();
+		new_positions.clear();
 		
 		//Update nodes
 		for (Node node : nodes) {
@@ -49,10 +59,19 @@ public class VerletLoop {
 					break;
 			}
 			
-			node.setOldPosition(new Location(node.getPosition().getWorld(), pos.getX(), pos.getY(), pos.getZ()));
-			node.setPosition(new_pos_location);
+			
+			old_positions.put(node, pos.toLocation(node.getPosition().getWorld()));
+			new_positions.put(node, new_pos_location);
 			
 		}
+		
+		for (Node node : old_positions.keySet()) {
+			node.setOldPosition(old_positions.get(node));
+			node.setPosition(new_positions.get(node));
+		}
+		
+		old_positions.clear();
+		new_positions.clear();
 		
 		//Update connectors
 		for(int i = 0; i < numberOfConstraintsUpdates; i++) {

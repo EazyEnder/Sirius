@@ -102,7 +102,7 @@ public class PhysicEngine  extends JavaPlugin{
 	
 	public static List<Connector> getConnectors(){return connectors;}
 	
-	public static void createRidigConnector(RigidConnector connector) {connectors.add(connector);}
+	public static void createRigidConnector(RigidConnector connector) {connectors.add(connector);}
 	
 	public static PhysicEngine getPhysicEngine() {
 		return main_instance;
