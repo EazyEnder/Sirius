@@ -13,6 +13,7 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.nodes.Node;
+import fr.eazyender.physicengine.nodes.NodeProperties.Ghost;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class VerletLoop {
@@ -73,12 +74,40 @@ public class VerletLoop {
 		old_positions.clear();
 		new_positions.clear();
 		
+		for (Node node : nodes) {
+			repairNodePosition(node, 0.1, 2);
+		}
+		
 		//Update connectors
 		for(int i = 0; i < numberOfConstraintsUpdates; i++) {
 			for (Connector connector : connectors) {
 				connector.update();
+				repairNodePosition(connector.getNode1(), 0.1, 2);
+				repairNodePosition(connector.getNode2(), 0.1, 2);
 			}
 		}
+		
+	}
+	
+	private static void repairNodePosition(Node node, double precision, double max) {
+		if(node.getProperties().getGhost_attribute() == Ghost.ENABLE) return;
+		if(node.getPosition().getBlock() == null || node.getPosition().getBlock().getType() == Material.AIR)return;
+		if(node.getPosition().toVector().equals(node.getOldPosition().toVector())) return;
+		
+		Vector exterior = node.getOldPosition().toVector().clone().subtract(node.getPosition().toVector().clone()).normalize();
+		
+		Location pos = node.getPosition().clone();
+		Vector ext = new Vector(0,0,0);
+		int i = 0;
+		while(pos.getBlock() != null && pos.getBlock().getType() != Material.AIR && i < 5/precision) {
+			i++;
+			ext.add(exterior.clone().normalize().multiply(precision));
+			pos = node.getPosition().clone().add(ext.toLocation(node.getPosition().getWorld()));
+			if(ext.length() > node.getOldPosition().toVector().clone().subtract(node.getPosition().toVector().clone()).length() * max)break;
+		}
+		
+		node.setOldPosition(pos.clone());
+		node.setPosition(pos.clone());
 		
 	}
 

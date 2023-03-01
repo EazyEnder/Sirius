@@ -2,11 +2,12 @@ package fr.eazyender.physicengine.nodes;
 
 public class NodeProperties {
 	
-	private TriggerSource trigger_source = TriggerSource.BLOCK;
+	private TriggerSource trigger_source = TriggerSource.TIMER;
 	private GravitationalForce grav_force = GravitationalForce.DISABLE;
 	private DragForce drag_force = DragForce.DISABLE;
 	private Static static_prop = Static.DISABLE;
 	private PlayerCollision player_collision = PlayerCollision.DISABLE;
+	private Ghost ghost_attribute = Ghost.DISABLE;
 	
 	public NodeProperties() {}
 	
@@ -50,6 +51,16 @@ public class NodeProperties {
 		this.drag_force = drag_force;
 	}
 	
+	
+	
+	public Ghost getGhost_attribute() {
+		return ghost_attribute;
+	}
+
+	public void setGhost_attribute(Ghost ghost_attribute) {
+		this.ghost_attribute = ghost_attribute;
+	}
+
 	public PlayerCollision getPlayer_collision() {
 		return player_collision;
 	}
@@ -60,7 +71,6 @@ public class NodeProperties {
 	
 	
 	
-
 //----------------------------------------------------------
 
 
@@ -81,6 +91,10 @@ public class NodeProperties {
 	}
 	
 	public static enum PlayerCollision {
+		ENABLE, DISABLE;
+	}
+	
+	public static enum Ghost {
 		ENABLE, DISABLE;
 	}
 
