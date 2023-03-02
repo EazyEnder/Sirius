@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.DebugMod;
+import fr.eazyender.physicengine.ObjectUtils;
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.links.RigidConnector;
 import fr.eazyender.physicengine.nodes.ChargedNode;
@@ -58,82 +59,81 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						Node node1 = new Node(node_loc, new Vector(0,0,0), 1, props);
 						PhysicEngine.createNode(node1);
 						
-					}else if(args[1].contentEquals("1")) {
-						Location node_loc = p.getLocation();
-						Vector velocity = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize().multiply(3);
-						
-						NodeProperties props = new NodeProperties();
-						props.setGrav_force(GravitationalForce.ENABLE);
-						props.setStatic_prop(Static.DISABLE);
-						props.setPlayer_collision(PlayerCollision.ENABLE);
-						Node node1 = new Node(node_loc, velocity, 1, props);
-						
-						NodeProperties props2 = new NodeProperties();
-						props2.setGrav_force(GravitationalForce.DISABLE);
-						props2.setStatic_prop(Static.ENABLE);
-						Node node2 = new Node(node_loc.clone().add(1,1,0), new Vector(0,0,0), 1, props2);
-						
-						Node node3 = new Node(node_loc.clone().add(-1,-1.25,0), velocity, 1, props);
-						Node node4 = new ChargedNode(node_loc.clone().add(-2.5,-2,0), velocity, 1, props, 1);
-						
-						PhysicEngine.createNode(node1);
-						PhysicEngine.createNode(node2);
-						PhysicEngine.createNode(node3);
-						PhysicEngine.createNode(node4);
-						
-						PhysicEngine.createRigidConnector(new RigidConnector(node1,node2, 0.05 ));
-						PhysicEngine.createRigidConnector(new RigidConnector(node1,node3, 0.05 ));
-						PhysicEngine.createRigidConnector(new RigidConnector(node4,node3, 0.05 ));
-					}else if(args[1].contentEquals("2")) {
-						Location node_loc = p.getLocation();
-						Vector velocity = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize().multiply(3);
-						
-						NodeProperties props = new NodeProperties();
-						props.setGrav_force(GravitationalForce.ENABLE);
-						props.setStatic_prop(Static.DISABLE);
-						props.setPlayer_collision(PlayerCollision.ENABLE);
-						Node node1 = new Node(node_loc, velocity, 1, props);
-						
-						NodeProperties props2 = new NodeProperties();
-						props2.setGrav_force(GravitationalForce.DISABLE);
-						props2.setStatic_prop(Static.ENABLE);
-						Node node2 = new Node(node_loc.clone().add(1,1,0), new Vector(0,0,0), 1, props2);
-						
-						Node node3 = new Node(node_loc.clone().add(-1,-1.25,0), velocity, 1, props);
-						Node node4 = new ChargedNode(node_loc.clone().add(-2.5,-2,0), velocity, 1, props, -1);
-						
-						PhysicEngine.createNode(node1);
-						PhysicEngine.createNode(node2);
-						PhysicEngine.createNode(node3);
-						PhysicEngine.createNode(node4);
-						
-						PhysicEngine.createRigidConnector(new RigidConnector(node1,node2, 0.05 ));
-						PhysicEngine.createRigidConnector(new RigidConnector(node1,node3, 0.05 ));
-						PhysicEngine.createRigidConnector(new RigidConnector(node4,node3, 0.05 ));
-					}else if(args[1].contentEquals("3")) {
-						Vector velocity = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize();
-						Location node_loc = p.getLocation();
-						
-						NodeProperties props = new NodeProperties();
-						props.setGrav_force(GravitationalForce.ENABLE);
-						props.setStatic_prop(Static.DISABLE);
-						props.setPlayer_collision(PlayerCollision.ENABLE);
-						Node node1 = new Node(node_loc, new Vector(0,0,0) , 1, props);
-						Node node2 = new Node(node_loc.clone().add(velocity.clone().normalize().multiply(1)), new Vector(0,0,0), 1, props);
-						Node node3 = new Node(node_loc.clone().add(velocity.clone().normalize().multiply(2)), new Vector(0,0,0), 1, props);
-						Node node4 = new Node(node_loc.clone().add(velocity.clone().normalize().multiply(3)), new Vector(0,0,0), 1, props);
-						
-						PhysicEngine.createNode(node1);
-						PhysicEngine.createNode(node2);
-						PhysicEngine.createNode(node3);
-						PhysicEngine.createNode(node4);
-						
-						PhysicEngine.createRigidConnector(new RigidConnector(node1,node2, 0.05 ));
-						PhysicEngine.createRigidConnector(new RigidConnector(node1,node3, 0.05 ));
-						PhysicEngine.createRigidConnector(new RigidConnector(node4,node3, 0.05 ));
+					}else if(args[1].contentEquals("rigid_line")) {
+						if(args.length > 1+2) {
+							int nbr_nodes = 1;
+							try {
+								nbr_nodes = Integer.parseInt(args[2]);
+							} catch (Exception e) {
+								p.sendMessage(prefix+"nbr_nodes doit être un entier !");
+							}
+							if(nbr_nodes < 1 ) {p.sendMessage(prefix+"nbr_nodes doit être supérieur à 1 !"); return false;}
+							double interdist = 1.0;
+							try {
+								interdist = Double.parseDouble(args[3]);
+							} catch (Exception e) {
+								p.sendMessage(prefix+"interdist doit être un double !");
+							}
+							if(interdist <= 0 ) {p.sendMessage(prefix+"interdist ne peut pas être inférieur ou égale à 0 !"); return false;}
+							
+							Vector direction = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize();
+							Location node_loc = p.getLocation();
+							ObjectUtils.createRigidLine(node_loc, nbr_nodes, interdist, direction);
+							
+						}else {
+							p.sendMessage(prefix+"Usage : "+command_name+" create rigid_line {nbr_nodes:Int} {interdist:Double}");
+						}
+					}else if(args[1].contentEquals("rigid_plan")) {
+						if(args.length > 1+2) {
+							int nbr_nodes = 1;
+							try {
+								nbr_nodes = Integer.parseInt(args[2]);
+							} catch (Exception e) {
+								p.sendMessage(prefix+"nbr_nodes doit être un entier !");
+							}
+							if(nbr_nodes < 1 ) {p.sendMessage(prefix+"nbr_nodes doit être supérieur à 1 !"); return false;}
+							double interdist = 1.0;
+							try {
+								interdist = Double.parseDouble(args[3]);
+							} catch (Exception e) {
+								p.sendMessage(prefix+"interdist doit être un double !");
+							}
+							if(interdist <= 0 ) {p.sendMessage(prefix+"interdist ne peut pas être inférieur ou égale à 0 !"); return false;}
+							
+							Vector direction = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize();
+							Location node_loc = p.getLocation();
+							ObjectUtils.createRigidPlan(node_loc, nbr_nodes, interdist, direction);
+							
+						}else {
+							p.sendMessage(prefix+"Usage : "+command_name+" create rigid_plan {nbr_nodes:Int} {interdist:Double}");
+						}
+					}else if(args[1].contentEquals("rigid_solid")) {
+						if(args.length > 1+2) {
+							int nbr_nodes = 1;
+							try {
+								nbr_nodes = Integer.parseInt(args[2]);
+							} catch (Exception e) {
+								p.sendMessage(prefix+"nbr_nodes doit être un entier !");
+							}
+							if(nbr_nodes < 1 ) {p.sendMessage(prefix+"nbr_nodes doit être supérieur à 1 !"); return false;}
+							double interdist = 1.0;
+							try {
+								interdist = Double.parseDouble(args[3]);
+							} catch (Exception e) {
+								p.sendMessage(prefix+"interdist doit être un double !");
+							}
+							if(interdist <= 0 ) {p.sendMessage(prefix+"interdist ne peut pas être inférieur ou égale à 0 !"); return false;}
+							
+							Vector direction = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize();
+							Location node_loc = p.getLocation();
+							ObjectUtils.createRigidSolid(node_loc, nbr_nodes, interdist, direction);
+							
+						}else {
+							p.sendMessage(prefix+"Usage : "+command_name+" create rigid_solid {nbr_nodes:Int} {interdist:Double}");
+						}
 					}
 				}else {
-					p.sendMessage(prefix+"Usage : "+command_name+" create {node}");
+					p.sendMessage(prefix+"Usage : "+command_name+" create {node/rigid_line/rigid_plan/rigid_solid}");
 				}
 				
 				
