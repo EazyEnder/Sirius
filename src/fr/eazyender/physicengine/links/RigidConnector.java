@@ -5,6 +5,9 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
+/*
+ * Simulate a distance constraint between 2 nodes.
+ */
 public class RigidConnector extends Connector {
 	
 	double distance;

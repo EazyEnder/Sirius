@@ -1,6 +1,5 @@
 package fr.eazyender.physicengine.loops;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class VerletLoop {
 				case BLOCK:
 					Block b = node.getPosition().getWorld().getBlockAt(new_pos_location);
 					if(b != null && !b.getType().equals(Material.AIR)) {
-						node.trigger();
+						node.trigger(b);
 					};
 					break;
 				default:

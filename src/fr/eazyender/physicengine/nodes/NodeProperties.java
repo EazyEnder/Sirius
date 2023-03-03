@@ -1,5 +1,18 @@
 package fr.eazyender.physicengine.nodes;
 
+/**
+ * Group in one object that contains all the generic attributes of a {@link Node}
+ * <br /> To use it, check the methods it contains and modify the properties.
+ * <br />
+ * <b>List of properties</b><br />
+ * -{@link TriggerSource} : On what condition/object the node will trigger, use {@link NodeTriggerEvent} to get it <br />
+ * -{@link GraviationalForce} : If gravity is on<br />
+ * -{@link DragForce} : If the drag force is on<br />
+ * -{@link Static} : If the node don't move / is anchored<br />
+ * -{@link PlayerCollision} : If a player can move the nodes when he collides with it<br />
+ * -{@link Ghost} : If the node go through block <br />
+ * -{@link InteractMode} : How the {@link NodeInteractEvent} will be triggered<br />
+ */
 public class NodeProperties {
 	
 	private TriggerSource trigger_source = TriggerSource.TIMER;
@@ -8,6 +21,7 @@ public class NodeProperties {
 	private Static static_prop = Static.DISABLE;
 	private PlayerCollision player_collision = PlayerCollision.DISABLE;
 	private Ghost ghost_attribute = Ghost.DISABLE;
+	private InteractMode interact_attribute = InteractMode.DISABLE;
 	
 	public NodeProperties() {}
 	
@@ -51,8 +65,14 @@ public class NodeProperties {
 		this.drag_force = drag_force;
 	}
 	
-	
-	
+	public InteractMode getInteract_attribute() {
+		return interact_attribute;
+	}
+
+	public void setInteract_attribute(InteractMode interact_attribute) {
+		this.interact_attribute = interact_attribute;
+	}
+
 	public Ghost getGhost_attribute() {
 		return ghost_attribute;
 	}
@@ -96,6 +116,10 @@ public class NodeProperties {
 	
 	public static enum Ghost {
 		ENABLE, DISABLE;
+	}
+	
+	public static enum InteractMode {
+		FREE, DISABLE;
 	}
 
 }

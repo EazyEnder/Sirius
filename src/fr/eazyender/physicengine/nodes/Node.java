@@ -6,17 +6,33 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.events.NodeTriggerEvent;
 import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.InteractMode;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 
+/**
+ * A node is the elementary component of the engine, it is on it that the forces will play.
+ */
 public class Node {
 	
 	private Location position;
 	private Location old_position;
 	private double mass;
 	private NodeProperties properties;
+	private String data;
+	public static double hitbox_radius = 0.15;
 	
+	
+	/**
+	 * A node is the elementary component of the engine, it is on it that the forces will play.
+	 * 
+	 * @param position : Position in Minecraft
+	 * @param init_velocity : Initial(t=0) velocity of the node 
+	 * @param mass : Mass ~ weight on how forces will influence
+	 * @param properties : Global properties, Check the class {@link NodeProperties}
+	 */
 	public Node(Location position, Vector init_velocity, double mass, NodeProperties properties) {
 		this.position = position;
 		this.old_position = position.clone().add(init_velocity.multiply(-PhysicEngine.dt));
@@ -24,9 +40,23 @@ public class Node {
 		this.properties = properties;
 	}
 	
-	public void trigger() {
+	public static Node checkNodeUsingRay(Location location, Vector direction, double max_length, double delta) {
+		Vector dir = direction.clone().normalize().multiply(delta);
+		Vector result = new Vector(0,0,0);
 		
-		PhysicEngine.removeNode(this);
+		while(result.length() < max_length) {
+			for (Node node : PhysicEngine.getNodes()) {
+				if(node.getProperties().getInteract_attribute() == InteractMode.DISABLE) continue;
+				if(location.distance(node.getPosition()) > max_length) continue;
+				if(location.clone().add(result).distance(node.getPosition()) <= hitbox_radius) return node;
+			}
+			result.add(dir);
+		}
+		return null;
+	}
+
+	public void trigger(Object data) {
+		Bukkit.getPluginManager().callEvent(new NodeTriggerEvent(this, getProperties().getTriggerSource(), data));
 	}
 	
 	public Vector applyForces(Vector velocity) {
@@ -49,6 +79,14 @@ public class Node {
 		}
 		
 		return result;
+	}
+	
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
 	}
 
 	public Location getPosition() {

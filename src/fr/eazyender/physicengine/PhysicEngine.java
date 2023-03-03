@@ -41,6 +41,7 @@ public class PhysicEngine  extends JavaPlugin{
 		createPhysicEngine(CalculIntegration.VERLET, 20);
 		
 		getCommand("sirius").setExecutor(new CommandPhysicEngine());
+		this.getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 		
 	}
 	
@@ -51,6 +52,9 @@ public class PhysicEngine  extends JavaPlugin{
 	}
 	
 	/**
+	 * 
+	 * First method that you need to call, this creates the loop.
+	 * 
 	 * @param integration : VERLET or EULER; Change the calculation method
 	 * @param tps : Integer from 1 to 20; Refresh time/dt/How many time we calculate in one second
 	 */

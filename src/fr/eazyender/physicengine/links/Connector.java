@@ -2,6 +2,9 @@ package fr.eazyender.physicengine.links;
 
 import fr.eazyender.physicengine.nodes.Node;
 
+/** 
+ * Connectors allow the user to simulate constraints, the simplest is a distance constraint (see {@link RigidConnector}). It also allows to apply a specific force between 2 nodes.
+ */
 public class Connector {
 	
 	protected Node node1;
