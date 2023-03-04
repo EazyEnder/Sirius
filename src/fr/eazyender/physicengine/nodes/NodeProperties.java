@@ -12,6 +12,7 @@ package fr.eazyender.physicengine.nodes;
  * -{@link PlayerCollision} : If a player can move the nodes when he collides with it<br />
  * -{@link Ghost} : If the node go through block <br />
  * -{@link InteractMode} : How the {@link NodeInteractEvent} will be triggered<br />
+ * -{@link GravitationalInfluence} : If the node is attracted by other nodes and/or if the node can attract others using her mass<br />
  */
 public class NodeProperties {
 	
@@ -22,14 +23,9 @@ public class NodeProperties {
 	private PlayerCollision player_collision = PlayerCollision.DISABLE;
 	private Ghost ghost_attribute = Ghost.DISABLE;
 	private InteractMode interact_attribute = InteractMode.DISABLE;
+	private GravitationalInfluence grav_influence = GravitationalInfluence.DISABLE;
 	
 	public NodeProperties() {}
-	
-	public NodeProperties(TriggerSource trigger_source, GravitationalForce grav_force, DragForce drag_force) {
-		this.trigger_source = trigger_source;
-		this.grav_force = grav_force;
-		this.drag_force = drag_force;
-	}
 	
 //----------------------------------------------------------
 	
@@ -80,6 +76,16 @@ public class NodeProperties {
 	public void setGhost_attribute(Ghost ghost_attribute) {
 		this.ghost_attribute = ghost_attribute;
 	}
+	
+	
+
+	public GravitationalInfluence getGrav_influence() {
+		return grav_influence;
+	}
+
+	public void setGrav_influence(GravitationalInfluence grav_influence) {
+		this.grav_influence = grav_influence;
+	}
 
 	public PlayerCollision getPlayer_collision() {
 		return player_collision;
@@ -120,6 +126,10 @@ public class NodeProperties {
 	
 	public static enum InteractMode {
 		FREE, DISABLE;
+	}
+	
+	public static enum GravitationalInfluence{
+		DISABLE, ATTRACT_OTHER, IS_ATTRACTED, ALL;
 	}
 
 }

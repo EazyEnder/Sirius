@@ -6,9 +6,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.PhysicalConstants;
 import fr.eazyender.physicengine.events.NodeTriggerEvent;
 import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.InteractMode;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 
@@ -62,8 +64,22 @@ public class Node {
 	public Vector applyForces(Vector velocity) {
 		Vector result = new Vector();
 		
-		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-1 * mass,0));
+		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-PhysicalConstants.gravity_constant * mass,0));
 		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-0.1*velocity.clone().dot(velocity.clone()));
+		
+		if(properties.getGrav_influence() == GravitationalInfluence.ALL || properties.getGrav_influence() == GravitationalInfluence.IS_ATTRACTED) {
+			for (Node node : PhysicEngine.getNodes()) {
+				if(node == this) continue;
+				if(node.getProperties().getGrav_influence() == GravitationalInfluence.DISABLE || node.getProperties().getGrav_influence() == GravitationalInfluence.IS_ATTRACTED)continue;
+				Vector force = node.getPosition().clone().subtract(this.getPosition().clone()).toVector();
+				force.normalize().multiply(PhysicalConstants.gravitationnal_constant * node.mass*mass);
+				
+				double distance_internodes = node.getPosition().distance(this.getPosition());
+				if(distance_internodes > 50) continue;
+				if(distance_internodes <= 0.1) distance_internodes = 0.1;
+				result.add(force.multiply(1/Math.pow(distance_internodes,2)));
+			}
+		}
 		
 		if(properties.getPlayer_collision() == PlayerCollision.ENABLE) {
 			for (Player player : Bukkit.getOnlinePlayers()) {

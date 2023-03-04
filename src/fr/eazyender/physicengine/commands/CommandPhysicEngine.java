@@ -1,5 +1,8 @@
 package fr.eazyender.physicengine.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,6 +18,7 @@ import fr.eazyender.physicengine.nodes.ChargedNode;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
@@ -50,14 +54,45 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				
 			}else if(args[0].equalsIgnoreCase("create")) {
 				if(args.length > 1) {
-					if(args[1].contentEquals("node")) {
-						Location node_loc = p.getLocation();
+					if(args[1].contentEquals("node_array")) {
+						
+						int nbr_nodes = 1;
+						try {
+							nbr_nodes = Integer.parseInt(args[2]);
+						} catch (Exception e) {
+							p.sendMessage(prefix+"nbr_nodes doit être un entier !");
+						}
+						if(nbr_nodes < 1 ) {p.sendMessage(prefix+"nbr_nodes doit être supérieur à 1 !"); return false;}
+						double inter_distance = 1.0;
+						try {
+							inter_distance = Double.parseDouble(args[3]);
+						} catch (Exception e) {
+							p.sendMessage(prefix+"interdist doit être un double !");
+						}
+						if(inter_distance <= 0 ) {p.sendMessage(prefix+"interdist ne peut pas être inférieur ou égale à 0 !"); return false;}
+						
+						Location loc = p.getLocation();
+						Location node_loc = loc.clone();
+						Vector direction = p.getTargetBlock(null, 40).getLocation().toVector().clone().subtract(p.getEyeLocation().toVector()).normalize();
+						Vector ortho = new Vector(-direction.getZ(),direction.getY(), direction.getX());
+						
 						NodeProperties props = new NodeProperties();
-						props.setGrav_force(GravitationalForce.ENABLE);
+						props.setGrav_force(GravitationalForce.DISABLE);
 						props.setStatic_prop(Static.DISABLE);
-						props.setPlayer_collision(PlayerCollision.ENABLE);
-						Node node1 = new Node(node_loc, new Vector(0,0,0), 1, props);
-						PhysicEngine.createNode(node1);
+						props.setGrav_influence(GravitationalInfluence.ALL);
+						
+						List<List<Node>> nodes = new ArrayList<List<Node>>();
+						for (int i=0; i < (int)Math.sqrt(nbr_nodes); i++) {
+							nodes.add(new ArrayList<Node>());
+							for (int j=0; j < (int)Math.sqrt(nbr_nodes); j++) {
+								Node node = new Node(node_loc.clone().add(direction.clone().normalize().multiply(inter_distance).multiply(j)).add(ortho.clone().normalize().multiply(inter_distance).multiply(i)), new Vector(0,0,0), 1, props);
+								nodes.get(i).add(node);
+								PhysicEngine.createNode(node);
+							}
+						}
+						
+						nodes.clear();
+						nodes = null;
 						
 					}else if(args[1].contentEquals("rigid_line")) {
 						if(args.length > 1+2) {
