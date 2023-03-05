@@ -38,4 +38,14 @@ public class ChargedNode extends Node{
 		return result;
 	}
 
+	public double getCharge() {
+		return charge;
+	}
+
+	public void setCharge(double charge) {
+		this.charge = charge;
+	}
+	
+	
+
 }
