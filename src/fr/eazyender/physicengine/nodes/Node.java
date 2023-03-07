@@ -13,6 +13,7 @@ import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.InteractMode;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
+import fr.eazyender.physicengine.quadtree.QuadTree;
 
 /**
  * A node is the elementary component of the engine, it is on it that the forces will play.
@@ -24,6 +25,9 @@ public class Node {
 	private double mass;
 	private NodeProperties properties;
 	private String data;
+	
+	private QuadTree host;
+	
 	public static double hitbox_radius = 0.15;
 	
 	
@@ -47,7 +51,7 @@ public class Node {
 		Vector result = new Vector(0,0,0);
 		
 		while(result.length() < max_length) {
-			for (Node node : PhysicEngine.getNodes()) {
+			for (Node node : PhysicEngine.nodes.getNodes()) {
 				if(node.getProperties().getInteract_attribute() == InteractMode.DISABLE) continue;
 				if(location.distance(node.getPosition()) > max_length) continue;
 				if(location.clone().add(result).distance(node.getPosition()) <= hitbox_radius) return node;
@@ -55,6 +59,10 @@ public class Node {
 			result.add(dir);
 		}
 		return null;
+	}
+	
+	public boolean delete() {
+		return host.getNodes().remove(this);
 	}
 
 	public void trigger(Object data) {
@@ -68,7 +76,7 @@ public class Node {
 		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-0.1*velocity.clone().dot(velocity.clone()));
 		
 		if(properties.getGrav_influence() == GravitationalInfluence.ALL || properties.getGrav_influence() == GravitationalInfluence.IS_ATTRACTED) {
-			for (Node node : PhysicEngine.getNodes()) {
+			for (Node node : PhysicEngine.nodes.getNodes()) {
 				if(node == this) continue;
 				if(node.getProperties().getGrav_influence() == GravitationalInfluence.DISABLE || node.getProperties().getGrav_influence() == GravitationalInfluence.IS_ATTRACTED)continue;
 				Vector force = node.getPosition().clone().subtract(this.getPosition().clone()).toVector();
@@ -97,6 +105,16 @@ public class Node {
 		return result;
 	}
 	
+	
+	
+	public QuadTree getHost() {
+		return host;
+	}
+
+	public void setHost(QuadTree host) {
+		this.host = host;
+	}
+
 	public String getData() {
 		return data;
 	}

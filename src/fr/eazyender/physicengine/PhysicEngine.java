@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.commands.CommandPhysicEngine;
 import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.links.RigidConnector;
 import fr.eazyender.physicengine.loops.VerletLoop;
-import fr.eazyender.physicengine.nodes.Node;
+import fr.eazyender.physicengine.quadtree.QuadTree;
+import fr.eazyender.physicengine.quadtree.QRegion;
 import net.md_5.bungee.api.ChatColor;
 
 /**
@@ -27,7 +30,7 @@ public class PhysicEngine  extends JavaPlugin{
 	
 	public static final String text_prefix = "§r§f§l[" + ChatColor.of(new Color(199, 236, 238)) + "§lSirius§r§f§l] :§r ";
 	
-	private static List<Node> nodes = new CopyOnWriteArrayList<Node>();
+	public static QuadTree nodes = new QuadTree(new QRegion(new Vector(0,0,0),Math.pow(2,15),null));
 	private static List<Connector> connectors = new CopyOnWriteArrayList<Connector>();
 	
 	public static boolean isPaused = false;
@@ -41,7 +44,11 @@ public class PhysicEngine  extends JavaPlugin{
 		createPhysicEngine(CalculIntegration.VERLET, 20);
 		
 		getCommand("sirius").setExecutor(new CommandPhysicEngine());
+		
+		nodes.region.setWorld(Bukkit.getWorlds().get(0));
+		
 		this.getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+		
 		
 	}
 	
@@ -98,11 +105,11 @@ public class PhysicEngine  extends JavaPlugin{
 		VERLET, EULER;
 	}
 	
-	public static void createNode(Node node) {nodes.add(node);}
+	//public static void createNode(Node node) {nodes.add(node);}
 	
-	public static List<Node> getNodes(){return nodes;}
+	//public static List<Node> getNodes(){return nodes;}
 	
-	public static boolean removeNode(Node node) {return nodes.remove(node);}
+	//public static boolean removeNode(Node node) {return nodes.remove(node);}
 	
 	public static List<Connector> getConnectors(){return connectors;}
 	

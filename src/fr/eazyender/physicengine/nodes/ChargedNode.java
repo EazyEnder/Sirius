@@ -19,7 +19,7 @@ public class ChargedNode extends Node{
 	public Vector applyForces(Vector velocity) {
 		Vector result = super.applyForces(velocity);
 		
-		for (Node node : PhysicEngine.getNodes()) {
+		for (Node node : PhysicEngine.nodes.getNodes()) {
 			if(!(node instanceof ChargedNode) || node == this)continue;
 			
 			double q2 = ((ChargedNode)node).charge;

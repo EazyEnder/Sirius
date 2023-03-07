@@ -17,13 +17,12 @@ import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 public class DebugMod {
 	
 	public static boolean drawingEnabled = true;
-	private static List<Node> nodes = PhysicEngine.getNodes(); 
 	private static List<Connector> connectors = PhysicEngine.getConnectors();
 	
 	
 	public static void draw() {
 		
-		for (Node node : nodes) {
+		for (Node node : PhysicEngine.nodes.getNodes()) {
 			
 			World world = node.getPosition().getWorld();
 			

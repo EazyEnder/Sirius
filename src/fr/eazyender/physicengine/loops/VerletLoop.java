@@ -17,7 +17,6 @@ import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class VerletLoop {
 	
-	private static List<Node> nodes = PhysicEngine.getNodes();
 	private static List<Connector> connectors = PhysicEngine.getConnectors();
 	
 	private static int numberOfConstraintsUpdates = 5;
@@ -33,7 +32,7 @@ public class VerletLoop {
 		new_positions.clear();
 		
 		//Update nodes
-		for (Node node : nodes) {
+		for (Node node : PhysicEngine.nodes.getNodes()) {
 			
 			if(node.getProperties().getStatic_prop() == Static.ENABLE)continue;
 
@@ -73,7 +72,7 @@ public class VerletLoop {
 		old_positions.clear();
 		new_positions.clear();
 		
-		for (Node node : nodes) {
+		for (Node node : PhysicEngine.nodes.getNodes()) {
 			repairNodePosition(node, 0.1, 2);
 		}
 		

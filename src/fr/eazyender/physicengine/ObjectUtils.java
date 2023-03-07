@@ -29,7 +29,7 @@ public class ObjectUtils {
 		for (int i=0; i < nbr_nodes; i++) {
 			Node node = new Node(node_loc.clone().add(direction.clone().normalize().multiply(inter_distance).multiply(i)), new Vector(0,0,0), 1, props);
 			nodes.add(node);
-			PhysicEngine.createNode(node);
+			PhysicEngine.nodes.insert(node);
 			if(i > 0)PhysicEngine.createRigidConnector(new RigidConnector(nodes.get(i-1),nodes.get(i), 0.05));
 		}
 		nodes.clear();
@@ -52,7 +52,7 @@ public class ObjectUtils {
 			for (int j=0; j < (int)Math.sqrt(nbr_nodes); j++) {
 				Node node = new Node(node_loc.clone().add(direction.clone().normalize().multiply(inter_distance).multiply(j)).add(ortho.clone().normalize().multiply(inter_distance).multiply(i)), new Vector(0,0,0), 1, props);
 				nodes.get(i).add(node);
-				PhysicEngine.createNode(node);
+				PhysicEngine.nodes.insert(node);
 				if(j > 0)PhysicEngine.createRigidConnector(new RigidConnector(nodes.get(i).get(j-1),nodes.get(i).get(j), 0.05));
 				if(i > 0)PhysicEngine.createRigidConnector(new RigidConnector(nodes.get(i-1).get(j),nodes.get(i).get(j), 0.05));
 			}
@@ -81,7 +81,7 @@ public class ObjectUtils {
 				for (int j=0; j < (int)Math.cbrt(nbr_nodes); j++) {
 					Node node = new ChargedNode(node_loc.clone().add(direction.clone().normalize().multiply(inter_distance).multiply(j)).add(ortho.clone().normalize().multiply(inter_distance).multiply(i)).add(normal.clone().normalize().multiply(inter_distance).multiply(k)), new Vector(0,0,0), 1, props, 1);
 					nodes.get(k).get(i).add(node);
-					PhysicEngine.createNode(node);
+					PhysicEngine.nodes.insert(node);
 					if(j > 0)PhysicEngine.createRigidConnector(new RigidConnector(nodes.get(k).get(i).get(j-1),nodes.get(k).get(i).get(j), 0.05));
 					if(i > 0)PhysicEngine.createRigidConnector(new RigidConnector(nodes.get(k).get(i-1).get(j),nodes.get(k).get(i).get(j), 0.05));
 					if(k > 0)PhysicEngine.createRigidConnector(new RigidConnector(nodes.get(k-1).get(i).get(j),nodes.get(k).get(i).get(j), 0.05));

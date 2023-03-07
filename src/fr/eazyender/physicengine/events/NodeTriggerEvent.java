@@ -21,8 +21,8 @@ public class NodeTriggerEvent extends Event{
 		this.data = data;
 	}
 	
-	public void deleteNode(boolean delete_node) {
-		PhysicEngine.removeNode(node);
+	public void deleteNode() {
+		node.delete();
 	}
 	
 	public Node getNode() {

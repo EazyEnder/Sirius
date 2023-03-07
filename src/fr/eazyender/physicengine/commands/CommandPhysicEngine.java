@@ -87,7 +87,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 							for (int j=0; j < (int)Math.sqrt(nbr_nodes); j++) {
 								Node node = new Node(node_loc.clone().add(direction.clone().normalize().multiply(inter_distance).multiply(j)).add(ortho.clone().normalize().multiply(inter_distance).multiply(i)), new Vector(0,0,0), 1, props);
 								nodes.get(i).add(node);
-								PhysicEngine.createNode(node);
+								PhysicEngine.nodes.insert(node);
 							}
 						}
 						
@@ -188,7 +188,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				}
 			}else if(args[0].equalsIgnoreCase("clear")) {
 				PhysicEngine.getConnectors().clear();
-				PhysicEngine.getNodes().clear();
+				PhysicEngine.nodes.clearAllNodes();
 				p.sendMessage(prefix+"Tous les objets ont été supprimés.");
 			}else if(args[0].equalsIgnoreCase("speed")) {
 				if(args.length > 1) {
