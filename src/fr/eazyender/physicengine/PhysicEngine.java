@@ -1,7 +1,6 @@
 package fr.eazyender.physicengine;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -11,9 +10,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.commands.CommandPhysicEngine;
+import fr.eazyender.physicengine.fields.Field;
+import fr.eazyender.physicengine.fields.FieldProperties;
+import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
 import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.links.RigidConnector;
 import fr.eazyender.physicengine.loops.VerletLoop;
+import fr.eazyender.physicengine.maths.MathField;
 import fr.eazyender.physicengine.quadtree.QuadTree;
 import fr.eazyender.physicengine.quadtree.QRegion;
 import net.md_5.bungee.api.ChatColor;
@@ -32,6 +35,7 @@ public class PhysicEngine  extends JavaPlugin{
 	
 	public static QuadTree nodes = new QuadTree(new QRegion(new Vector(0,0,0),Math.pow(2,15),null));
 	private static List<Connector> connectors = new CopyOnWriteArrayList<Connector>();
+	private static List<Field> fields = new CopyOnWriteArrayList<Field>();
 	
 	public static boolean isPaused = false;
 	public static double engineSpeed = 1;
@@ -99,8 +103,15 @@ public class PhysicEngine  extends JavaPlugin{
 			
 		}.runTaskTimer(main_instance, 0, 1);
 		
+		Field test_field = new Field(new MathField((v) -> new double[] {-v[2]-v[0],0,v[0]-v[2]}), (new FieldProperties()).setInteractWthNode(NodeInteraction.VELOCITY), 0.05);
+		fields.add(test_field);
+		
 	}
 	
+	/**
+	 * VERLET : {@link VerletLoop}
+	 *
+	 */
 	public static enum CalculIntegration{
 		VERLET, EULER;
 	}
@@ -112,6 +123,8 @@ public class PhysicEngine  extends JavaPlugin{
 	//public static boolean removeNode(Node node) {return nodes.remove(node);}
 	
 	public static List<Connector> getConnectors(){return connectors;}
+	
+	public static List<Field> getFields(){return fields;}
 	
 	public static void createRigidConnector(RigidConnector connector) {connectors.add(connector);}
 	

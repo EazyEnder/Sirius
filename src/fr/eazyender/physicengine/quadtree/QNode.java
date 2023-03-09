@@ -2,6 +2,10 @@ package fr.eazyender.physicengine.quadtree;
 
 import org.bukkit.Location;
 
+/**
+ * QNode is a simplified node : contains less properties than a normal node. <br />
+ * This is use when we calculate a mean node of all nodes in a quadtree.
+ */
 public class QNode {
 	
 	private Location position;

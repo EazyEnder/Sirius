@@ -13,13 +13,12 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.DebugMod;
 import fr.eazyender.physicengine.ObjectUtils;
 import fr.eazyender.physicengine.PhysicEngine;
-import fr.eazyender.physicengine.links.RigidConnector;
-import fr.eazyender.physicengine.nodes.ChargedNode;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties;
+import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
-import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class CommandPhysicEngine  implements CommandExecutor {
@@ -54,7 +53,14 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				
 			}else if(args[0].equalsIgnoreCase("create")) {
 				if(args.length > 1) {
-					if(args[1].contentEquals("node_array")) {
+					if(args[1].contentEquals("field_node")) {
+						NodeProperties props = new NodeProperties();
+						props.setField_influence(FieldsInfluence.ENABLE);
+						props.setDrag_force(DragForce.ENABLE);
+						Node node = new Node(p.getLocation(),new Vector(0,0,0),1,props);
+						PhysicEngine.nodes.insert(node);
+					}
+					else if(args[1].contentEquals("node_array")) {
 						
 						int nbr_nodes = 1;
 						try {

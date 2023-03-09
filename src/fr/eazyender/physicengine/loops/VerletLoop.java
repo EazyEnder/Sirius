@@ -10,8 +10,11 @@ import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.fields.Field;
+import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
 import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.nodes.Node;
+import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.Ghost;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
@@ -42,6 +45,15 @@ public class VerletLoop {
 			Vector delta_pos = pos.clone().subtract(old_pos.clone());
 			
 			Vector acceleration = node.applyForces(delta_pos.clone().multiply(1/dt)).multiply(1/node.getMass());
+			
+			Vector velocity_fields = new Vector(0,0,0);
+			if(node.getProperties().getField_influence() == FieldsInfluence.ENABLE)
+			for (Field field : PhysicEngine.getFields()) {
+				if(field.getProperties().getInteractWthNode() != NodeInteraction.VELOCITY) continue;
+				velocity_fields.add(field.getField().calc(pos));
+				if(pos.distance(old_pos) > 0.05)velocity_fields.subtract(field.getField().calc(old_pos));
+			}
+			delta_pos.add(velocity_fields.multiply(dt));
 			
 			Vector new_pos = pos.clone().add(delta_pos.multiply(1).add(acceleration.multiply(dt*dt)));
 			Location new_pos_location = new Location(node.getPosition().getWorld(), new_pos.getX(), new_pos.getY(), new_pos.getZ());

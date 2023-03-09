@@ -10,6 +10,12 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.nodes.ChargedNode;
 import fr.eazyender.physicengine.nodes.Node;
 
+/**
+ * 
+ * The QuadTree is a way to organize the points no longer in a list but in a tree. <br />
+ * To do this, simply create a 2*2 grid and each time a cell exceeds a certain number of nodes, it is subdivided into a 2*2 grid.
+ *
+ */
 public class QuadTree {
 	
 	static final int QT_NODE_CAPACITY = 100;

@@ -8,7 +8,10 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.PhysicalConstants;
 import fr.eazyender.physicengine.events.NodeTriggerEvent;
+import fr.eazyender.physicengine.fields.Field;
+import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
 import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.InteractMode;
@@ -41,6 +44,7 @@ public class Node {
 	 */
 	public Node(Location position, Vector init_velocity, double mass, NodeProperties properties) {
 		this.position = position;
+		if(init_velocity == null)init_velocity = new Vector(0,0,0);
 		this.old_position = position.clone().add(init_velocity.multiply(-PhysicEngine.dt));
 		this.mass = mass;
 		this.properties = properties;
@@ -73,7 +77,7 @@ public class Node {
 		Vector result = new Vector();
 		
 		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-PhysicalConstants.gravity_constant * mass,0));
-		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-0.1*velocity.clone().dot(velocity.clone()));
+		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-PhysicalConstants.DragCoef*velocity.clone().dot(velocity.clone()));
 		
 		if(properties.getGrav_influence() == GravitationalInfluence.ALL || properties.getGrav_influence() == GravitationalInfluence.IS_ATTRACTED) {
 			for (Node node : PhysicEngine.nodes.getNodes()) {
@@ -100,6 +104,12 @@ public class Node {
 					result.add(delta_hit);
 				}
 			}
+		}
+		
+		if(getProperties().getField_influence() == FieldsInfluence.ENABLE)
+		for (Field field : PhysicEngine.getFields()) {
+			if(field.getProperties().getInteractWthNode() != NodeInteraction.FORCE) continue;
+			result.add(field.getField().calc(position.toVector()));
 		}
 		
 		return result;
