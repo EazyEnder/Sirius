@@ -1,6 +1,7 @@
 package fr.eazyender.physicengine.nodes;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display.Brightness;
@@ -133,6 +134,7 @@ public class Node {
 		if(properties.getPlayer_collision() == PlayerCollision.ENABLE) {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if(player.getWorld() != this.getPosition().getWorld()) continue;
+				if(player.getGameMode() == GameMode.SPECTATOR) continue;
 				
 				Location pos_player = player.getLocation().clone().add(0,1,0);
 				if(pos_player.distance(this.position) < 0.75){
@@ -180,7 +182,7 @@ public class Node {
 		return;
 		}
 		
-		render_entity.teleport(center);
+		render_entity.teleport(center.setDirection(getVelocity()));
 		render_entity.setVelocity(getVelocity());
 		
 	}

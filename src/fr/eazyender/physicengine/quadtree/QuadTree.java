@@ -138,6 +138,26 @@ public class QuadTree {
 		
 	}
 	
+	public List<Node> query(Vector min, Vector max, Class type){
+		if(type == null)type = Node.class;
+		List<Node> result = new ArrayList<Node>();
+		
+		if(!region.containsVector(min) && region.containsVector(max)) return result;
+		
+		for (Node node : nodes) {
+			if(type.isInstance(node) && node.getPosition().toVector().isInAABB(min, max) && !result.contains(node))result.add(node);
+		}
+		
+		if(northWest == null) return result;
+		
+		result.addAll(northWest.query(min,max,type));
+		result.addAll(northEast.query(min,max,type));
+		result.addAll(southWest.query(min,max,type));
+		result.addAll(southEast.query(min,max,type));
+		
+		return result;
+	}
+	
 	public void clearAllNodes() {
 		if(northWest != null) {
 			northWest.clearAllNodes();
@@ -157,21 +177,23 @@ public class QuadTree {
 		
 		//Up
 		QuadTree par = this.parent;
-		Vector center_direction = par.region.center.clone().subtract(this.region.center);
-		int iters = 0;
-		while(iters < 100 && par != null && Math.abs(center_direction.angle(direction) % 2*Math.PI) >= Math.PI/2) {
-			par = par.parent;
-			if(par == null) break;
-			center_direction = par.region.center.clone().subtract(this.region.center);
-			iters++;
-		}
-		
-		if(par == null)return null;
+		if(par != null) {
+			Vector center_direction = par.region.center.clone().subtract(this.region.center);
+			int iters = 0;
+			while(iters < 100 && par != null && Math.abs(center_direction.angle(direction) % 2*Math.PI) >= Math.PI/2) {
+				if(par.parent == null) break;
+				par = par.parent;
+				center_direction = par.region.center.clone().subtract(this.region.center);
+				iters++;
+			}
+			
+			if(par == null)return null;
+		}else {par = this;}
 			
 		direction.multiply(par.region.half_length*2);
 		
 		//Down
-		iters = 0;
+		int iters = 0;
 		while(iters < 100 && par.northWest != null && par.region.half_length != this.region.half_length) {
 			double nw_dist = Math.abs(par.region.center.clone().add(par.northWest.region.center).distance(this.region.center.clone().add(direction)));
 			double ne_dist = Math.abs(par.region.center.clone().add(par.northEast.region.center).distance(this.region.center.clone().add(direction)));
@@ -232,7 +254,7 @@ public class QuadTree {
 		
 		if(northWest == null) {
 			
-			if(nodes.size() <= 0) return new QNode(region.center.toLocation(region.world), 0, 0);
+			if(nodes.size() <= 0) { this.average_node = new QNode(region.center.toLocation(region.world), 0, 0); return this.average_node;}
 			
 			Location average_location = null;
 			double average_mass = 0;

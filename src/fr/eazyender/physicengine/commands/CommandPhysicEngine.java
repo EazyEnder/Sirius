@@ -16,6 +16,7 @@ import org.bukkit.util.Vector;
 import fr.eazyender.physicengine.DebugMod;
 import fr.eazyender.physicengine.ObjectUtils;
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.nodes.BoidNode;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeMaterial;
 import fr.eazyender.physicengine.nodes.NodeProperties;
@@ -23,6 +24,7 @@ import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
+import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class CommandPhysicEngine  implements CommandExecutor {
@@ -64,6 +66,14 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						Node node = new Node(p.getLocation(),new Vector(0,0,0),1,props);
 						
 						node.setMaterial(new NodeMaterial(Bukkit.createBlockData(Material.BAMBOO_PLANKS), 0.25f));
+						
+						PhysicEngine.nodes.insert(node);
+					}
+					else if(args[1].contentEquals("boid_node")) {
+						NodeProperties props = new NodeProperties();
+						props.setPlayer_collision(PlayerCollision.ENABLE);
+						BoidNode node = new BoidNode(p.getLocation(),new Vector(0,0,0),1,props);
+						node.setMaterial(new NodeMaterial(Bukkit.createBlockData(Material.LAPIS_BLOCK), 0.25f));
 						
 						PhysicEngine.nodes.insert(node);
 					}

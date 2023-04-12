@@ -21,6 +21,10 @@ public class QRegion {
 		Vector node_pos = node.getPosition().toVector();
 		return node_pos.isInAABB(center.clone().add(new Vector(-half_length,-100,-half_length)), center.clone().add(new Vector(+half_length,1500,+half_length)));
 	}
+	
+	public boolean containsVector(Vector vector) {		
+		return vector.isInAABB(center.clone().add(new Vector(-half_length,-100,-half_length)), center.clone().add(new Vector(+half_length,1500,+half_length)));
+	}
 
 	public Vector getCenter() {
 		return center;
