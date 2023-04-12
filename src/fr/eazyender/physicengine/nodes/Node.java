@@ -2,14 +2,20 @@ package fr.eazyender.physicengine.nodes;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Display.Brightness;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.PhysicalConstants;
 import fr.eazyender.physicengine.events.NodeTriggerEvent;
 import fr.eazyender.physicengine.fields.Field;
 import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
+import fr.eazyender.physicengine.nodes.NodeProperties.ChargeInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
@@ -28,8 +34,13 @@ public class Node {
 	private double mass;
 	private NodeProperties properties;
 	private String data;
+	private NodeMaterial material; private BlockDisplay render_entity;
+	private double charge = 0;
 	
 	private QuadTree host;
+	
+	
+	public boolean isDeleted = false;
 	
 	public static double hitbox_radius = 0.15;
 	
@@ -66,7 +77,12 @@ public class Node {
 	}
 	
 	public boolean delete() {
-		return host.getNodes().remove(this);
+		if(host.getNodes().remove(this)) {
+			if(render_entity != null) render_entity.remove();
+			isDeleted = true;
+			return true;
+		}
+		return false;
 	}
 
 	public void trigger(Object data) {
@@ -93,6 +109,27 @@ public class Node {
 			}
 		}
 		
+		if(charge != 0 && (properties.getCharge_influence() == ChargeInfluence.ALL || properties.getCharge_influence() == ChargeInfluence.IS_ATTRACTED)) {
+			for (Node node : PhysicEngine.nodes.getNodes()) {
+				if(properties.getCharge_influence() == ChargeInfluence.DISABLE || properties.getCharge_influence() == ChargeInfluence.IS_ATTRACTED || node == this || node.charge == 0)continue;
+				
+				double q2 = node.charge;
+				
+				Vector force = node.getPosition().clone().subtract(this.getPosition().clone()).toVector();
+				force.normalize().multiply((-charge)*q2);
+				
+				double distance_internodes = node.getPosition().distance(this.getPosition());
+				if(distance_internodes > 50) continue;
+				if(distance_internodes <= 0.1) distance_internodes = 0.1;
+				double coef = 1/Math.pow(distance_internodes,2);
+				if(coef > 3) coef = 3;
+				
+				force.multiply(coef);
+				result.add(force);
+	
+			}
+		}
+		
 		if(properties.getPlayer_collision() == PlayerCollision.ENABLE) {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if(player.getWorld() != this.getPosition().getWorld()) continue;
@@ -100,7 +137,7 @@ public class Node {
 				Location pos_player = player.getLocation().clone().add(0,1,0);
 				if(pos_player.distance(this.position) < 0.75){
 					Vector delta_hit = this.position.clone().subtract(pos_player).toVector();
-					delta_hit.normalize().multiply((1/pos_player.distance(this.position)));
+					delta_hit.normalize().multiply(5*(1/pos_player.distance(this.position)));
 					result.add(delta_hit);
 				}
 			}
@@ -113,6 +150,39 @@ public class Node {
 		}
 		
 		return result;
+	}
+	
+	public void render() {
+		
+		if(material == null)return;
+		
+		Location center = position.clone();
+		center.add(new Vector(-material.size/2,-material.size/2,-material.size/2));
+		
+		if(render_entity == null) {render_entity = (BlockDisplay) center.getWorld().spawn(position, BlockDisplay.class, display -> {
+			
+			
+			display.setGravity(false);
+			display.setVelocity(getVelocity());
+			display.setBlock(material.texture);
+			display.setBrightness(new Brightness(15, 15));
+			display.setInvulnerable(true);
+			display.setCustomNameVisible(false);
+			
+			display.setDisplayHeight(material.size);
+			display.setDisplayWidth(material.size);
+			
+			Transformation transfo = new Transformation(new Vector3f(0,0,0),new AxisAngle4f (0,0,0,0),new Vector3f(material.size,material.size,material.size),new AxisAngle4f (0,0,0,0));
+			
+			display.setTransformation(transfo);
+			
+			});
+		return;
+		}
+		
+		render_entity.teleport(center);
+		render_entity.setVelocity(getVelocity());
+		
 	}
 	
 	
@@ -168,6 +238,32 @@ public class Node {
 	public void setProperties(NodeProperties properties) {
 		this.properties = properties;
 	}
+
+	public NodeMaterial getMaterial() {
+		return material;
+	}
+
+	public void setMaterial(NodeMaterial material) {
+		this.material = material;
+	}
+
+	public BlockDisplay getRender_entity() {
+		return render_entity;
+	}
+
+	public void setRender_entity(BlockDisplay render_entity) {
+		this.render_entity = render_entity;
+	}
+	
+	public double getCharge() {
+		return charge;
+	}
+
+	public void setCharge(double charge) {
+		this.charge = charge;
+	}
+	
+	
 	
 	
 	

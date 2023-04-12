@@ -7,7 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-import fr.eazyender.physicengine.nodes.ChargedNode;
+import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.nodes.Node;
 
 /**
@@ -41,6 +41,29 @@ public class QuadTree {
 		}
 		//Find neighbors
 		neighbors = getNeighbors();
+		
+		//Rearrange nodes if a node exit the region
+		for (Node node : nodes) {
+			if(region.containsNode(node)) continue;
+			
+			boolean flag = false;
+			for (QuadTree nghb : neighbors) {
+				if(!nghb.region.containsNode(node)) continue;
+				
+				nodes.remove(node);
+				flag = nghb.insert(node);
+				break;
+			}
+			
+			if(flag) continue;
+			
+			nodes.remove(node);
+			if(!PhysicEngine.nodes.insert(node)) {
+				System.out.println("[SIRIUS] Error : Node outside of all QT => Deleted");
+				node.delete();
+			}
+			
+		}
 		
 		if(northWest != null) {
 			northWest.update();
@@ -122,6 +145,7 @@ public class QuadTree {
 			southWest.clearAllNodes();
 			southEast.clearAllNodes();
 		}
+		this.nodes.forEach(node -> node.delete());
 		this.nodes.clear();
 	}
 	
@@ -169,7 +193,7 @@ public class QuadTree {
 	
 	
 	/**
-	 * @return A QuadTree list which contains : the {north_west/north_est/south_west/south_est} neighbor.
+	 * @return A QuadTree list which contains all QT neighbors
 	 */
 	public List<QuadTree> getNeighbors(){
 		List<QuadTree> neighbors = new ArrayList<QuadTree>();
@@ -181,6 +205,11 @@ public class QuadTree {
 		neighbors.add(getNeighbor(new Vector(-1,0,1)));
 		//se
 		neighbors.add(getNeighbor(new Vector(1,0,1)));
+		
+		neighbors.add(getNeighbor(new Vector(0,0,-1)));
+		neighbors.add(getNeighbor(new Vector(0,0,1)));
+		neighbors.add(getNeighbor(new Vector(-1,0,0)));
+		neighbors.add(getNeighbor(new Vector(1,0,0)));
 		
 		return neighbors;
 	}
@@ -214,14 +243,15 @@ public class QuadTree {
 				else average_location.add(node.getPosition().clone().multiply(node.getMass()));
 				
 				average_mass += node.getMass();
-				if(node instanceof ChargedNode) average_charge += ((ChargedNode)node).getCharge();
+				average_charge += node.getCharge();
 			}
 			
 			if(average_mass != 0) average_location.multiply(1/average_mass);
 			average_mass /= nodes.size();
 			average_charge /= nodes.size();
 			
-			return new QNode(average_location, average_mass, average_charge);
+			this.average_node = new QNode(average_location, average_mass, average_charge);
+			return this.average_node;
 		
 		}
 		
@@ -239,11 +269,11 @@ public class QuadTree {
 		average_mass = average_mass / 4;
 		double average_charge = (nw_node.getCharge() + ne_node.getCharge() + sw_node.getCharge() + se_node.getCharge()) / 4;
 		
-		QNode a_node = new QNode(
+		this.average_node = new QNode(
 				average_location, average_mass, average_charge
 				);
 		
-		return a_node;
+		return this.average_node;
 	}
 	
 

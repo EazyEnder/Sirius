@@ -13,6 +13,7 @@ package fr.eazyender.physicengine.nodes;
  * -{@link Ghost} : If the node go through block <br />
  * -{@link InteractMode} : How the {@link NodeInteractEvent} will be triggered<br />
  * -{@link GravitationalInfluence} : If the node is attracted by other nodes and/or if the node can attract others using her mass<br />
+ * -{@link ChargeInfluence} : Same as Grav
  * -{@link FieldsInfluence} : If fields can move the node<br />
  */
 public class NodeProperties {
@@ -25,6 +26,7 @@ public class NodeProperties {
 	private Ghost ghost_attribute = Ghost.DISABLE;
 	private InteractMode interact_attribute = InteractMode.DISABLE;
 	private GravitationalInfluence grav_influence = GravitationalInfluence.DISABLE;
+	private ChargeInfluence charge_influence = ChargeInfluence.DISABLE;
 	private FieldsInfluence field_influence = FieldsInfluence.DISABLE;
 	
 	public NodeProperties() {}
@@ -92,6 +94,14 @@ public class NodeProperties {
 	
 	
 
+	public ChargeInfluence getCharge_influence() {
+		return charge_influence;
+	}
+
+	public void setCharge_influence(ChargeInfluence charge_influence) {
+		this.charge_influence = charge_influence;
+	}
+
 	public GravitationalInfluence getGrav_influence() {
 		return grav_influence;
 	}
@@ -142,6 +152,10 @@ public class NodeProperties {
 	}
 	
 	public static enum GravitationalInfluence{
+		DISABLE, ATTRACT_OTHER, IS_ATTRACTED, ALL;
+	}
+	
+	public static enum ChargeInfluence{
 		DISABLE, ATTRACT_OTHER, IS_ATTRACTED, ALL;
 	}
 	

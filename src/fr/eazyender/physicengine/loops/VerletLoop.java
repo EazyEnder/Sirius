@@ -10,6 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.PhysicalConstants;
 import fr.eazyender.physicengine.fields.Field;
 import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
 import fr.eazyender.physicengine.links.Connector;
@@ -97,6 +98,17 @@ public class VerletLoop {
 			}
 		}
 		
+		
+		
+		//Render
+		for (Node node : PhysicEngine.nodes.getNodes()) {
+			node.render();
+		}
+		for (Connector connector : connectors) {
+			connector.render();
+		}
+		
+		
 	}
 	
 	private static void repairNodePosition(Node node, double precision, double max) {
@@ -115,6 +127,11 @@ public class VerletLoop {
 			pos = node.getPosition().clone().add(ext.toLocation(node.getPosition().getWorld()));
 			if(ext.length() > node.getOldPosition().toVector().clone().subtract(node.getPosition().toVector().clone()).length() * max)break;
 		}
+		
+
+		if(node.getOldPosition().distance(pos) <= PhysicalConstants.oscillation_cancel) {
+			node.setPosition(node.getOldPosition());
+			return;}
 		
 		node.setOldPosition(pos.clone());
 		node.setPosition(pos.clone());

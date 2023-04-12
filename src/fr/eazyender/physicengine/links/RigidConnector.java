@@ -53,7 +53,7 @@ public class RigidConnector extends Connector {
 	//Apply constraint
 	@Override
 	public void update() {
-		
+		super.update();
 		
 		Vector pos1 = node1.getPosition().toVector();
 		Vector pos2 = node2.getPosition().toVector();	

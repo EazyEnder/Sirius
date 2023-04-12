@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -14,9 +15,12 @@ import fr.eazyender.physicengine.fields.Field;
 import fr.eazyender.physicengine.fields.FieldProperties;
 import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
 import fr.eazyender.physicengine.links.Connector;
+import fr.eazyender.physicengine.links.ConnectorMaterial;
 import fr.eazyender.physicengine.links.RigidConnector;
 import fr.eazyender.physicengine.loops.VerletLoop;
 import fr.eazyender.physicengine.maths.MathField;
+import fr.eazyender.physicengine.nodes.Node;
+import fr.eazyender.physicengine.nodes.NodeMaterial;
 import fr.eazyender.physicengine.quadtree.QuadTree;
 import fr.eazyender.physicengine.quadtree.QRegion;
 import net.md_5.bungee.api.ChatColor;
@@ -59,7 +63,7 @@ public class PhysicEngine  extends JavaPlugin{
 	@Override
 	public void onDisable()
 	{
-		
+		cleanEngine();
 	}
 	
 	/**
@@ -92,6 +96,8 @@ public class PhysicEngine  extends JavaPlugin{
 					break;
 				}
 				
+				
+				nodes.update();
 			}
 		}.runTaskTimer(main_instance, 0, tps);
 		
@@ -116,6 +122,12 @@ public class PhysicEngine  extends JavaPlugin{
 		VERLET, EULER;
 	}
 	
+	public static void cleanEngine() {
+		
+		PhysicEngine.getConnectors().forEach(connector -> connector.delete());
+		PhysicEngine.nodes.clearAllNodes();
+	}
+	
 	//public static void createNode(Node node) {nodes.add(node);}
 	
 	//public static List<Node> getNodes(){return nodes;}
@@ -126,7 +138,7 @@ public class PhysicEngine  extends JavaPlugin{
 	
 	public static List<Field> getFields(){return fields;}
 	
-	public static void createRigidConnector(RigidConnector connector) {connectors.add(connector);}
+	public static void createRigidConnector(RigidConnector connector) {connector.setMaterial(new ConnectorMaterial(Bukkit.createBlockData(Material.BAMBOO_PLANKS), 0.05f));connectors.add(connector);}
 	
 	public static PhysicEngine getPhysicEngine() {
 		return main_instance;

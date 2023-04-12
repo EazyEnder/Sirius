@@ -3,7 +3,10 @@ package fr.eazyender.physicengine.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +17,7 @@ import fr.eazyender.physicengine.DebugMod;
 import fr.eazyender.physicengine.ObjectUtils;
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.nodes.Node;
+import fr.eazyender.physicengine.nodes.NodeMaterial;
 import fr.eazyender.physicengine.nodes.NodeProperties;
 import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
@@ -58,6 +62,9 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						props.setField_influence(FieldsInfluence.ENABLE);
 						props.setDrag_force(DragForce.ENABLE);
 						Node node = new Node(p.getLocation(),new Vector(0,0,0),1,props);
+						
+						node.setMaterial(new NodeMaterial(Bukkit.createBlockData(Material.BAMBOO_PLANKS), 0.25f));
+						
 						PhysicEngine.nodes.insert(node);
 					}
 					else if(args[1].contentEquals("node_array")) {
@@ -193,8 +200,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 					p.sendMessage(prefix+"La simulation a été remise en route.");
 				}
 			}else if(args[0].equalsIgnoreCase("clear")) {
-				PhysicEngine.getConnectors().clear();
-				PhysicEngine.nodes.clearAllNodes();
+				PhysicEngine.cleanEngine();
 				p.sendMessage(prefix+"Tous les objets ont été supprimés.");
 			}else if(args[0].equalsIgnoreCase("speed")) {
 				if(args.length > 1) {

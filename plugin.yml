@@ -2,7 +2,7 @@ name: PhysicEngine
 version: 1.0
 author: EazyEnder
 main: fr.eazyender.physicengine.PhysicEngine
-api-version: 1.18
+api-version: 1.19
 commands:
   sirius:
     description: Config the physic engine
