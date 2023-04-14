@@ -236,8 +236,12 @@ public class QuadTree {
 		return neighbors;
 	}
 	
+	/**
+	 * 
+	 * @return Only the first layer of nodes
+	 */
 	public List<Node> getNodes() {
-		List<Node> no = new ArrayList<Node>();
+		List<Node> no = new CopyOnWriteArrayList<Node>();
 		
 		if(northEast != null) {
 			no.addAll(northWest.getNodes());
@@ -247,6 +251,14 @@ public class QuadTree {
 		}
 		no.addAll(nodes);
 		
+		return no;
+	}
+	
+	public List<Node> getAllLayeredNodes(){
+		List<Node> no = getNodes();
+		for (Node node : no) {
+			no.addAll(node.getAllNodes());
+		}
 		return no;
 	}
 	

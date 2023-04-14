@@ -17,6 +17,7 @@ public class Lang_fr_FR {
 		words.put("QT_ERROR_NODE_OUTSIDE", "Erreur : Un noeud est en dehors de tous les QT => Supprimé");
 		words.put("QT_ERROR_NODE_NOTINSUBTREES", "Erreur : Erreur : {1} noeuds qui sont dans le QuadTree {2} ne sont dans aucun sous arbres");
 		words.put("QT_INFO_SUBDIVISE", "Sous division du QuadTree :");
+		words.put("QT_ERROR_NODE_SPEED_LIMIT", "Erreur : Un noeud a une vitesse au dessus de la limite autorisée => Supprimé");
 		
 		words.put("CMD_DEBUGMOD_ENABLE", "Le mode de debug a été activé.");
 		words.put("CMD_DEBUGMOD_DISABLE", "Le mode de debug a été désactivé.");

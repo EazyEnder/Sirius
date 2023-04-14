@@ -13,6 +13,7 @@ import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.PhysicalConstants;
 import fr.eazyender.physicengine.fields.Field;
 import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
+import fr.eazyender.physicengine.lang.LangManager;
 import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
@@ -35,8 +36,10 @@ public class VerletLoop {
 		old_positions.clear();
 		new_positions.clear();
 		
+		
+		
 		//Update nodes
-		for (Node node : PhysicEngine.nodes.getNodes()) {
+		for (Node node : PhysicEngine.nodes.getAllLayeredNodes()) {
 			
 			if(node.getProperties().getStatic_prop() == Static.ENABLE)continue;
 
@@ -59,7 +62,7 @@ public class VerletLoop {
 			Vector new_pos = pos.clone().add(delta_pos.multiply(1).add(acceleration.multiply(dt*dt)));
 			Location new_pos_location = new Location(node.getPosition().getWorld(), new_pos.getX(), new_pos.getY(), new_pos.getZ());
 			
-			//Trigger verification part
+			//Trigger verification part / dont work for layered nodes
 			switch(node.getProperties().getTriggerSource()) {
 				case BLOCK:
 					Block b = node.getPosition().getWorld().getBlockAt(new_pos_location);
@@ -85,7 +88,7 @@ public class VerletLoop {
 		old_positions.clear();
 		new_positions.clear();
 		
-		for (Node node : PhysicEngine.nodes.getNodes()) {
+		for (Node node : PhysicEngine.nodes.getAllLayeredNodes()) {
 			repairNodePosition(node, 0.1, 2);
 		}
 		
@@ -98,10 +101,17 @@ public class VerletLoop {
 			}
 		}
 		
+		//Verif
+		for (Node node : PhysicEngine.nodes.getAllLayeredNodes()) {
+			if(node.getVelocity().length() > 1000) {
+				System.out.println("[SIRIUS]" + LangManager.getText("QT_ERROR_NODE_SPEED_LIMIT"));
+				node.delete();
+			}
+		}
 		
 		
 		//Render
-		for (Node node : PhysicEngine.nodes.getNodes()) {
+		for (Node node : PhysicEngine.nodes.getAllLayeredNodes()) {
 			node.render();
 		}
 		for (Connector connector : connectors) {
@@ -113,28 +123,28 @@ public class VerletLoop {
 	
 	private static void repairNodePosition(Node node, double precision, double max) {
 		if(node.getProperties().getGhost_attribute() == Ghost.ENABLE) return;
-		if(node.getPosition().getBlock() == null || node.getPosition().getBlock().getType() == Material.AIR)return;
-		if(node.getPosition().toVector().equals(node.getOldPosition().toVector())) return;
+		if(node.calculateAbsolutePosition().toLocation(node.getPosition().getWorld()).getBlock() == null || node.calculateAbsolutePosition().toLocation(node.getPosition().getWorld()).getBlock().getType() == Material.AIR)return;
+		if(node.calculateAbsolutePosition().equals(node.calculateOldAbsolutePosition())) return;
 		
-		Vector exterior = node.getOldPosition().toVector().clone().subtract(node.getPosition().toVector().clone()).normalize();
+		Vector exterior = node.calculateOldAbsolutePosition().clone().subtract(node.calculateAbsolutePosition().clone()).normalize();
 		
-		Location pos = node.getPosition().clone();
+		Location pos = node.calculateAbsolutePosition().toLocation(node.getPosition().getWorld()).clone();
 		Vector ext = new Vector(0,0,0);
 		int i = 0;
 		while(pos.getBlock() != null && pos.getBlock().getType() != Material.AIR && i < 5/precision) {
 			i++;
 			ext.add(exterior.clone().normalize().multiply(precision));
-			pos = node.getPosition().clone().add(ext.toLocation(node.getPosition().getWorld()));
-			if(ext.length() > node.getOldPosition().toVector().clone().subtract(node.getPosition().toVector().clone()).length() * max)break;
+			pos = node.calculateAbsolutePosition().toLocation(node.getPosition().getWorld()).clone().add(ext.toLocation(node.getPosition().getWorld()));
+			if(ext.length() > node.calculateOldAbsolutePosition().clone().subtract(node.calculateAbsolutePosition().clone()).length() * max)break;
 		}
 		
 
-		if(node.getOldPosition().distance(pos) <= PhysicalConstants.oscillation_cancel) {
+		if(node.calculateOldAbsolutePosition().distance(pos.toVector()) <= PhysicalConstants.oscillation_cancel) {
 			node.setPosition(node.getOldPosition());
 			return;}
 		
-		node.setOldPosition(pos.clone());
-		node.setPosition(pos.clone());
+		node.setOldPosition(node.removeHostPositions(pos.clone().toVector()).toLocation(pos.getWorld()));
+		node.setPosition(node.removeHostPositions(pos.clone().toVector()).toLocation(pos.getWorld()));
 		
 	}
 

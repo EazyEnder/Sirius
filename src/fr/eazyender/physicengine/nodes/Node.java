@@ -1,5 +1,9 @@
 package fr.eazyender.physicengine.nodes;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -26,6 +30,7 @@ import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.InteractMode;
+import fr.eazyender.physicengine.nodes.NodeProperties.NodeRange;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 import fr.eazyender.physicengine.quadtree.QuadTree;
 
@@ -42,7 +47,10 @@ public class Node {
 	private NodeMaterial material; private Display render_entity;
 	private double charge = 0;
 	
-	private QuadTree host;
+	//QuadTree or Node
+	private Object host;
+	
+	private	List<Node> childs = new CopyOnWriteArrayList<Node>(); 
 	
 	
 	public boolean isDeleted = false;
@@ -53,7 +61,7 @@ public class Node {
 	/**
 	 * A node is the elementary component of the engine, it is on it that the forces will play.
 	 * 
-	 * @param position : Position in Minecraft
+	 * @param position : Position in the reference frame of its host (if host is QuadTree then it is the absolute position).
 	 * @param init_velocity : Initial(t=0) velocity of the node 
 	 * @param mass : Mass ~ weight on how forces will influence
 	 * @param properties : Global properties, Check the class {@link NodeProperties}
@@ -82,7 +90,8 @@ public class Node {
 	}
 	
 	public boolean delete() {
-		if(host.getNodes().remove(this)) {
+		if((host instanceof QuadTree && ((QuadTree)host).getNodes().remove(this)) || (host instanceof Node && ((Node)host).getNodes().remove(this))) {
+			for (Node child : childs) {child.delete();}
 			if(render_entity != null) render_entity.remove();
 			isDeleted = true;
 			return true;
@@ -97,11 +106,23 @@ public class Node {
 	public Vector applyForces(Vector velocity) {
 		Vector result = new Vector();
 		
+		List<Node> available_nodes = PhysicEngine.nodes.getNodes();
+		if(properties.getNode_selection() != NodeRange.ALL && host != null) {
+			if(host instanceof QuadTree) {
+				//true bcs other options will come soon
+				if(true || properties.getNode_selection() == NodeRange.QUADTREE_PARENT) {
+					available_nodes = ((QuadTree)host).getNodes();
+				}
+			}else if(host instanceof Node) {
+				available_nodes = ((Node)host).childs;
+			}
+		}
+		
 		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-PhysicalConstants.gravity_constant * mass,0));
 		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-PhysicalConstants.DragCoef*velocity.clone().dot(velocity.clone()));
 		
 		if(properties.getGrav_influence() == GravitationalInfluence.ALL || properties.getGrav_influence() == GravitationalInfluence.IS_ATTRACTED) {
-			for (Node node : PhysicEngine.nodes.getNodes()) {
+			for (Node node : available_nodes) {
 				if(node == this) continue;
 				if(node.getProperties().getGrav_influence() == GravitationalInfluence.DISABLE || node.getProperties().getGrav_influence() == GravitationalInfluence.IS_ATTRACTED)continue;
 				Vector force = node.getPosition().clone().subtract(this.getPosition().clone()).toVector();
@@ -115,7 +136,7 @@ public class Node {
 		}
 		
 		if(charge != 0 && (properties.getCharge_influence() == ChargeInfluence.ALL || properties.getCharge_influence() == ChargeInfluence.IS_ATTRACTED)) {
-			for (Node node : PhysicEngine.nodes.getNodes()) {
+			for (Node node : available_nodes) {
 				if(properties.getCharge_influence() == ChargeInfluence.DISABLE || properties.getCharge_influence() == ChargeInfluence.IS_ATTRACTED || node == this || node.charge == 0)continue;
 				
 				double q2 = node.charge;
@@ -141,8 +162,8 @@ public class Node {
 				if(player.getGameMode() == GameMode.SPECTATOR) continue;
 				
 				Location pos_player = player.getLocation().clone().add(0,1,0);
-				if(pos_player.distance(this.position) < 0.75){
-					Vector delta_hit = this.position.clone().subtract(pos_player).toVector();
+				if(pos_player.toVector().distance(calculateAbsolutePosition()) < 0.75){
+					Vector delta_hit = calculateAbsolutePosition().clone().subtract(pos_player.toVector());
 					delta_hit.normalize().multiply(5*(1/pos_player.distance(this.position)));
 					result.add(delta_hit);
 				}
@@ -162,12 +183,11 @@ public class Node {
 		
 		if(material == null)return;
 		
-		Location center = position.clone();
-		center.add(new Vector(-material.size/2,-material.size/2,-material.size/2));
+		Location center = calculateAbsolutePosition().toLocation(this.getPosition().getWorld()).clone();
 		
 		if(render_entity == null) {
 			if(material.texture instanceof BlockData) {
-			render_entity = (BlockDisplay) center.getWorld().spawn(position, BlockDisplay.class, display -> {
+			render_entity = (BlockDisplay) center.getWorld().spawn(center, BlockDisplay.class, display -> {
 			
 				
 				display.setGravity(false);
@@ -190,7 +210,7 @@ public class Node {
 				
 			});}
 			else if(material.texture instanceof ItemStack) {
-				render_entity = (ItemDisplay) center.getWorld().spawn(position, ItemDisplay.class, display -> {
+				render_entity = (ItemDisplay) center.getWorld().spawn(center, ItemDisplay.class, display -> {
 					display.setGravity(false);
 					display.setVelocity(getVelocity());
 					display.setItemStack((ItemStack) material.texture);
@@ -219,13 +239,78 @@ public class Node {
 		
 	}
 	
+	public Vector calculateOldAbsolutePosition() {
+		Vector absolute_pos = this.getOldPosition().clone().toVector();
+		Node runner = this;
+		while(runner.host instanceof Node) {
+			runner = (Node)runner.host;
+			absolute_pos.add(runner.getOldPosition().toVector());
+		}
+		
+		return absolute_pos;
+	}
 	
+	public Vector calculateAbsolutePosition() {
+		Vector absolute_pos = this.getPosition().clone().toVector();
+		Node runner = this;
+		while(runner.host instanceof Node) {
+			runner = (Node)runner.host;
+			absolute_pos.add(runner.getPosition().toVector());
+		}
+		
+		return absolute_pos;
+	}
 	
-	public QuadTree getHost() {
+	public Vector removeHostPositions(Vector vector) {
+		Vector absolute_pos = vector.clone();
+		Node runner = this;
+		while(runner.host instanceof Node) {
+			runner = (Node)runner.host;
+			absolute_pos.subtract(runner.getPosition().toVector());
+		}
+		
+		return absolute_pos;
+	}
+	
+	public Vector removeHostOldPositions(Vector vector) {
+		Vector absolute_pos = vector.clone();
+		Node runner = this;
+		while(runner.host instanceof Node) {
+			runner = (Node)runner.host;
+			absolute_pos.subtract(runner.getOldPosition().toVector());
+		}
+		
+		return absolute_pos;
+	}
+	
+	public boolean insertNode(Node node) {
+		if(childs.contains(node))return false;
+		boolean flag = childs.add(node);
+		if(flag)node.host = this;
+		return flag;
+	}
+	
+	public List<Node> getNodes() {
+		return childs;
+	}
+	
+	public List<Node> getAllNodes(){
+		List<Node> no = new CopyOnWriteArrayList<Node>();
+		
+		for (Node node : childs) {
+			no.addAll(node.getAllNodes());
+		}
+		
+		no.addAll(childs);
+		
+		return no;
+	}
+	
+	public Object getHost() {
 		return host;
 	}
 
-	public void setHost(QuadTree host) {
+	public void setHost(Object host) {
 		this.host = host;
 	}
 

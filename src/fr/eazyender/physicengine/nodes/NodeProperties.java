@@ -13,8 +13,9 @@ package fr.eazyender.physicengine.nodes;
  * -{@link Ghost} : If the node go through block <br />
  * -{@link InteractMode} : How the {@link NodeInteractEvent} will be triggered<br />
  * -{@link GravitationalInfluence} : If the node is attracted by other nodes and/or if the node can attract others using her mass<br />
- * -{@link ChargeInfluence} : Same as Grav
+ * -{@link ChargeInfluence} : Same as Grav<br />
  * -{@link FieldsInfluence} : If fields can move the node<br />
+ * -{@link NodeRange} : What is the list of nodes that grav (influence) force / charge force (and other stuff that interacts with other nodes) interacts with.
  */
 public class NodeProperties {
 	
@@ -28,6 +29,7 @@ public class NodeProperties {
 	private GravitationalInfluence grav_influence = GravitationalInfluence.DISABLE;
 	private ChargeInfluence charge_influence = ChargeInfluence.DISABLE;
 	private FieldsInfluence field_influence = FieldsInfluence.DISABLE;
+	private NodeRange node_selection = NodeRange.ALL;
 	
 	public NodeProperties() {}
 	
@@ -118,13 +120,25 @@ public class NodeProperties {
 		this.player_collision = player_collision;
 	}
 	
+	public NodeRange getNode_selection() {
+		return node_selection;
+	}
+
+	public void setNode_selection(NodeRange node_selection) {
+		this.node_selection = node_selection;
+	}
+	
 	
 	
 //----------------------------------------------------------
 
 
+	public static enum NodeRange { 
+		ALL, QUADTREE_NEIHBORS_AND_MEANNODES, QUADTREE_PARENT_AND_MEANNODES, QUADTREE_NEIGHBORS, QUADTREE_PARENT, NODE_PARENT;
+	}
+
 	public static enum TriggerSource { 
-		TIMER, BLOCK, ENTITY
+		TIMER, BLOCK, ENTITY;
 	}
 	
 	public static enum GravitationalForce {

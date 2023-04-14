@@ -112,7 +112,7 @@ public class PhysicEngine  extends JavaPlugin{
 			
 		}.runTaskTimer(main_instance, 0, 1);
 		
-		Field test_field = new Field(new MathField((v) -> new double[] {-v[2]-v[0],0,v[0]-v[2]}), (new FieldProperties()).setInteractWthNode(NodeInteraction.VELOCITY), 0.05);
+		Field test_field = new Field(new MathField((v) -> new double[] {-v[2]-v[0]*0,0,v[0]-v[2]*0}), (new FieldProperties()).setInteractWthNode(NodeInteraction.VELOCITY), 1);
 		fields.add(test_field);
 		
 	}

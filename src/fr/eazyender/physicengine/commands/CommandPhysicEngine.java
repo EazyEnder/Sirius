@@ -27,6 +27,7 @@ import fr.eazyender.physicengine.nodes.NodeProperties.DragForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
+import fr.eazyender.physicengine.nodes.NodeProperties.NodeRange;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
@@ -77,7 +78,32 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						props.setDrag_force(DragForce.ENABLE);
 						Node node = new Node(p.getLocation(),new Vector(0,0,0),1,props);
 						
-						node.setMaterial(new NodeMaterial(Bukkit.createBlockData(Material.BAMBOO_PLANKS), 0.25f));
+						node.setMaterial(new NodeMaterial(Bukkit.createBlockData(Material.BAMBOO_PLANKS), 0.5f));
+						
+						PhysicEngine.nodes.insert(node);
+					}else if(args[1].contentEquals("layered_node")) {
+						NodeProperties props = new NodeProperties();
+						props.setPlayer_collision(PlayerCollision.ENABLE);
+						BoidNode node = new BoidNode(p.getLocation(),new Vector(0,0,0),1,props);
+						
+						ItemStack model = new ItemStack(Material.RED_DYE);
+						ItemMeta meta = model.getItemMeta();
+						meta.setCustomModelData(1);
+						model.setItemMeta(meta);
+						
+						NodeMaterial n_mat = new NodeMaterial(model, (float) (0.7f + Math.random()));
+						NodeMaterial n_mat_child = new NodeMaterial(model, n_mat.getSize() * 0.55f);
+						n_mat_child.setGlow(Color.MAROON);
+						node.setMaterial(n_mat);
+						NodeProperties props_child = new NodeProperties();
+						props_child.setNode_selection(NodeRange.NODE_PARENT);
+						props_child.setField_influence(FieldsInfluence.ENABLE);
+						
+						for (int i = 0; i < 4; i++) {
+							Node node_child = new Node((new Vector(-0.1 - Math.random()*1.5, 0, -0.1 - Math.random()*1.5)).toLocation(p.getWorld()), new Vector(0,0,0), 1, props_child);
+							node_child.setMaterial(n_mat_child);
+							node.insertNode(node_child);
+						}
 						
 						PhysicEngine.nodes.insert(node);
 					}

@@ -38,7 +38,7 @@ public class Connector {
 	public void render() {
 		if(material == null)return;
 
-		Location center = node1.getPosition().clone();
+		Location center = node1.calculateAbsolutePosition().toLocation(node1.getPosition().getWorld()).clone();
 		//center.add(new Vector(-material.size/2,-material.size/2,-material.size/2));
 		
 		if(render_entity == null) {render_entity = (BlockDisplay) center.getWorld().spawn(center, BlockDisplay.class, display -> {
