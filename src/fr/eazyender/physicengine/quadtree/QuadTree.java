@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.lang.LangManager;
 import fr.eazyender.physicengine.nodes.Node;
 
 /**
@@ -59,7 +60,7 @@ public class QuadTree {
 			
 			nodes.remove(node);
 			if(!PhysicEngine.nodes.insert(node)) {
-				System.out.println("[SIRIUS] Error : Node outside of all QT => Deleted");
+				System.out.println("[SIRIUS]" + LangManager.getText("QT_ERROR_NODE_OUTSIDE"));
 				node.delete();
 			}
 			
@@ -98,7 +99,7 @@ public class QuadTree {
 	
 	public void subdivide() {
 		
-		System.out.println("[SIRIUS] Subdivise QuadTree : " + region.center);
+		System.out.println("[SIRIUS] " + LangManager.getText("QT_INFO_SUBDIVISE") + region.center);
 		
 		northWest = new QuadTree(new QRegion(region.center.clone().add(new Vector(-region.half_length/2, 0, -region.half_length/2)), region.half_length/2, region.world));
 		northEast = new QuadTree(new QRegion(region.center.clone().add(new Vector(+region.half_length/2, 0, -region.half_length/2)), region.half_length/2, region.world));
@@ -133,8 +134,7 @@ public class QuadTree {
 			}
 		}
 		
-		if(nodes.size() > 0)System.out.println("[SIRIUS] Error : " + nodes.size() +" nodes in the quadtree (" + this.region.center + ") are not in the sub trees.");
-		
+		if(nodes.size() > 0)System.out.println("[SIRIUS]" + LangManager.getText("QT_ERROR_NODE_NOTINSUBTREES",new String[] {String.valueOf(nodes.size()),this.region.center.toString()}));
 		
 	}
 	

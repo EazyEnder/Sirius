@@ -11,7 +11,7 @@ import fr.eazyender.physicengine.PhysicEngine;
 public class BoidNode extends Node{
 
 	private double visual_range = 30;
-	private double avoid_factor = 0.05, min_distance = 1;
+	private double avoid_factor = 0.5, min_distance = 1.5;
 	private double max_velocity = 10;
 	
 	public BoidNode(Location position, Vector init_velocity, double mass, NodeProperties properties) {

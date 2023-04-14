@@ -4,18 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.DebugMod;
 import fr.eazyender.physicengine.ObjectUtils;
 import fr.eazyender.physicengine.PhysicEngine;
+import fr.eazyender.physicengine.lang.LangManager;
 import fr.eazyender.physicengine.nodes.BoidNode;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeMaterial;
@@ -44,16 +47,25 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				if(args.length > 1) {
 					if(args[1].toUpperCase().equalsIgnoreCase("ON")) {
 						DebugMod.drawingEnabled = true;
-						p.sendMessage(prefix+"Debug mod has been enabled.");
+						p.sendMessage(prefix+LangManager.getText("CMD_DEBUGMOD_ENABLE"));
 						
 					}else if(args[1].toUpperCase().equalsIgnoreCase("OFF")) {
 						DebugMod.drawingEnabled = false;
-						p.sendMessage(prefix+"Debug mod has been disabled.");
+						p.sendMessage(prefix+LangManager.getText("CMD_DEBUGMOD_DISABLE"));
 					}else {
 						p.sendMessage(prefix+"Usage : "+command_name+" debug {ON/OFF}");
 					}
 				}else {
 					p.sendMessage(prefix+"Usage : "+command_name+" debug {ON/OFF}");
+				}
+				
+			}
+			else if(args[0].equalsIgnoreCase("lang")) {
+				if(args.length > 1) {
+						LangManager.lang = args[1];
+						p.sendMessage(prefix+LangManager.getText("CMD_LANG_SWITCH"));
+				}else {
+					p.sendMessage(prefix+"Usage : "+command_name+" lang {id_lang}");
 				}
 				
 				
@@ -73,7 +85,15 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						NodeProperties props = new NodeProperties();
 						props.setPlayer_collision(PlayerCollision.ENABLE);
 						BoidNode node = new BoidNode(p.getLocation(),new Vector(0,0,0),1,props);
-						node.setMaterial(new NodeMaterial(Bukkit.createBlockData(Material.LAPIS_BLOCK), 0.25f));
+						
+						ItemStack model = new ItemStack(Material.RED_DYE);
+						ItemMeta meta = model.getItemMeta();
+						meta.setCustomModelData(1);
+						model.setItemMeta(meta);
+						
+						NodeMaterial n_mat = new NodeMaterial(model, (float) (0.4f + Math.random()));
+						n_mat.setGlow(Color.YELLOW);
+						node.setMaterial(n_mat);
 						
 						PhysicEngine.nodes.insert(node);
 					}
@@ -197,26 +217,26 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				
 			}else if(args[0].equalsIgnoreCase("pause")) {
 				if(PhysicEngine.isPaused) {
-					p.sendMessage(prefix+"La simulation est déjà en pause. Faites "+command_name+" resume ,pour relancer la simulation.");
+					p.sendMessage(prefix+LangManager.getText("CMD_SIMU_ALREADY_PAUSED",new String[] {command_name}));
 				}else {
 					PhysicEngine.isPaused = true;
-					p.sendMessage(prefix+"La simulation a été mise en pause.");
+					p.sendMessage(prefix+LangManager.getText("CMD_SIMU_PAUSE"));
 				}
 			}else if(args[0].equalsIgnoreCase("resume")) {
 				if(!PhysicEngine.isPaused) {
-					p.sendMessage(prefix+"La simulation est déjà en route. Faites "+command_name+" pause ,pour mettre en pause la simulation.");
+					p.sendMessage(prefix+LangManager.getText("CMD_SIMU_ALREADY_RESUMED",new String[] {command_name}));
 				}else {
 					PhysicEngine.isPaused = false;
-					p.sendMessage(prefix+"La simulation a été remise en route.");
+					p.sendMessage(prefix+LangManager.getText("CMD_SIMU_RESUME"));
 				}
 			}else if(args[0].equalsIgnoreCase("clear")) {
 				PhysicEngine.cleanEngine();
-				p.sendMessage(prefix+"Tous les objets ont été supprimés.");
+				p.sendMessage(prefix+LangManager.getText("CMD_CLEAR"));
 			}else if(args[0].equalsIgnoreCase("speed")) {
 				if(args.length > 1) {
 					if(Double.parseDouble(args[1]) > 0) {
 						PhysicEngine.engineSpeed = Double.parseDouble(args[1]);
-						p.sendMessage(prefix+"La vitesse de la simu a été changée à : " + PhysicEngine.engineSpeed + ".");
+						p.sendMessage(prefix+LangManager.getText("CMD_SIMU_SPEED",new String[] {String.valueOf(PhysicEngine.engineSpeed)}));
 					}
 				}else {
 					p.sendMessage(prefix+"Usage : "+command_name+" speed {double}");

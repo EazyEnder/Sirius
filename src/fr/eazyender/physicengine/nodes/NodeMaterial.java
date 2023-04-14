@@ -1,20 +1,24 @@
 package fr.eazyender.physicengine.nodes;
 
+
+import org.bukkit.Color;
 import org.bukkit.block.data.BlockData;
 
 public class NodeMaterial {
 	
-	BlockData texture;
+	Object texture;
 	float size;
+	Color glow = null;
 	
-	public NodeMaterial(BlockData texture, float size) {
+	//BlockData for BlockDisplay or ItemStack for ItemDisplay
+	public NodeMaterial(Object texture, float size) {
 		
 		this.texture = texture;
 		this.size = size;
 		
 	}
 
-	public BlockData getTexture() {
+	public Object getTexture() {
 		return texture;
 	}
 
@@ -29,6 +33,16 @@ public class NodeMaterial {
 	public void setSize(float size) {
 		this.size = size;
 	}
+
+	public Color getGlow() {
+		return glow;
+	}
+
+	public void setGlow(Color glow) {
+		this.glow = glow;
+	}
+	
+	
 	
 	
 

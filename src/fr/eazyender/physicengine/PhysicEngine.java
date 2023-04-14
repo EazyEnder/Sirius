@@ -14,6 +14,7 @@ import fr.eazyender.physicengine.commands.CommandPhysicEngine;
 import fr.eazyender.physicengine.fields.Field;
 import fr.eazyender.physicengine.fields.FieldProperties;
 import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
+import fr.eazyender.physicengine.lang.LangManager;
 import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.links.ConnectorMaterial;
 import fr.eazyender.physicengine.links.RigidConnector;
@@ -48,6 +49,8 @@ public class PhysicEngine  extends JavaPlugin{
 	public void onEnable() 
 	{
 		main_instance = this;
+		
+		LangManager.init();
 		
 		createPhysicEngine(CalculIntegration.VERLET, 20);
 		

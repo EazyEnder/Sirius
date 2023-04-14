@@ -3,9 +3,13 @@ package fr.eazyender.physicengine.nodes;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Display.Brightness;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
@@ -35,7 +39,7 @@ public class Node {
 	private double mass;
 	private NodeProperties properties;
 	private String data;
-	private NodeMaterial material; private BlockDisplay render_entity;
+	private NodeMaterial material; private Display render_entity;
 	private double charge = 0;
 	
 	private QuadTree host;
@@ -161,28 +165,56 @@ public class Node {
 		Location center = position.clone();
 		center.add(new Vector(-material.size/2,-material.size/2,-material.size/2));
 		
-		if(render_entity == null) {render_entity = (BlockDisplay) center.getWorld().spawn(position, BlockDisplay.class, display -> {
+		if(render_entity == null) {
+			if(material.texture instanceof BlockData) {
+			render_entity = (BlockDisplay) center.getWorld().spawn(position, BlockDisplay.class, display -> {
 			
-			
-			display.setGravity(false);
-			display.setVelocity(getVelocity());
-			display.setBlock(material.texture);
-			display.setBrightness(new Brightness(15, 15));
-			display.setInvulnerable(true);
-			display.setCustomNameVisible(false);
-			
-			display.setDisplayHeight(material.size);
-			display.setDisplayWidth(material.size);
-			
-			Transformation transfo = new Transformation(new Vector3f(0,0,0),new AxisAngle4f (0,0,0,0),new Vector3f(material.size,material.size,material.size),new AxisAngle4f (0,0,0,0));
-			
-			display.setTransformation(transfo);
-			
-			});
+				
+				display.setGravity(false);
+				display.setVelocity(getVelocity());
+				display.setBlock((BlockData)material.texture);
+				display.setBrightness(new Brightness(15, 15));
+				display.setInvulnerable(true);
+				display.setCustomNameVisible(false);
+				
+				display.setDisplayHeight(material.size);
+				display.setDisplayWidth(material.size);
+				if(material.glow != null) {
+					display.setGlowColorOverride(material.glow);
+					display.setGlowing(true);
+				}
+				
+				Transformation transfo = new Transformation(new Vector3f(0,0,0),new AxisAngle4f (0,0,0,0),new Vector3f(material.size,material.size,material.size),new AxisAngle4f (0,0,0,0));
+				
+				display.setTransformation(transfo);
+				
+			});}
+			else if(material.texture instanceof ItemStack) {
+				render_entity = (ItemDisplay) center.getWorld().spawn(position, ItemDisplay.class, display -> {
+					display.setGravity(false);
+					display.setVelocity(getVelocity());
+					display.setItemStack((ItemStack) material.texture);
+					display.setBrightness(new Brightness(15, 15));
+					display.setInvulnerable(true);
+					display.setCustomNameVisible(false);
+					
+					display.setDisplayHeight(material.size);
+					display.setDisplayWidth(material.size);
+					if(material.glow != null) {
+						display.setGlowColorOverride(material.glow);
+						display.setGlowing(true);
+					}
+					
+					Transformation transfo = new Transformation(new Vector3f(0,0,0),new AxisAngle4f (0,0,0,0),new Vector3f(material.size,material.size,material.size),new AxisAngle4f (0,0,0,0));
+					
+					display.setTransformation(transfo);
+				});
+			}
 		return;
 		}
 		
-		render_entity.teleport(center.setDirection(getVelocity()));
+		if(material.texture instanceof ItemStack) {render_entity.teleport(center.setDirection(getVelocity().clone().multiply(-1)));}
+		else render_entity.teleport(center.setDirection(getVelocity()));
 		render_entity.setVelocity(getVelocity());
 		
 	}
@@ -249,7 +281,7 @@ public class Node {
 		this.material = material;
 	}
 
-	public BlockDisplay getRender_entity() {
+	public Display getRender_entity() {
 		return render_entity;
 	}
 
