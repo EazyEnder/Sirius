@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,6 +30,7 @@ import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.NodeRange;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
+import fr.eazyender.physicengine.nodes.NodeProperties.PlayerForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class CommandPhysicEngine  implements CommandExecutor {
@@ -110,6 +112,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 					else if(args[1].contentEquals("boid_node")) {
 						NodeProperties props = new NodeProperties();
 						props.setPlayer_collision(PlayerCollision.ENABLE);
+						props.setPlayer_force(PlayerForce.ALL);
 						BoidNode node = new BoidNode(p.getLocation(),new Vector(0,0,0),1,props);
 						
 						ItemStack model = new ItemStack(Material.RED_DYE);
@@ -118,8 +121,8 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						model.setItemMeta(meta);
 						
 						NodeMaterial n_mat = new NodeMaterial(model, (float) (0.4f + Math.random()));
-						n_mat.setGlow(Color.YELLOW);
 						node.setMaterial(n_mat);
+						n_mat.setParticle_type(Particle.ASH);
 						
 						PhysicEngine.nodes.insert(node);
 					}

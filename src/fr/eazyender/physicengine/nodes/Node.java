@@ -2,11 +2,13 @@ package fr.eazyender.physicengine.nodes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
@@ -32,6 +34,8 @@ import fr.eazyender.physicengine.nodes.NodeProperties.GravitationalInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.InteractMode;
 import fr.eazyender.physicengine.nodes.NodeProperties.NodeRange;
 import fr.eazyender.physicengine.nodes.NodeProperties.PlayerCollision;
+import fr.eazyender.physicengine.nodes.NodeProperties.PlayerForce;
+import fr.eazyender.physicengine.nodes.NodeProperties.PlayerForce.PlayerForce_Type;
 import fr.eazyender.physicengine.quadtree.QuadTree;
 
 /**
@@ -46,6 +50,8 @@ public class Node {
 	private String data;
 	private NodeMaterial material; private Display render_entity;
 	private double charge = 0;
+	
+	private List<UUID> player_list = new ArrayList<UUID>();
 	
 	//QuadTree or Node
 	private Object host;
@@ -118,9 +124,11 @@ public class Node {
 			}
 		}
 		
+		//----------------GENERIC FORCES------------------
 		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-PhysicalConstants.gravity_constant * mass,0));
 		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-PhysicalConstants.DragCoef*velocity.clone().dot(velocity.clone()));
 		
+		//----------------GRAV FORCE BETWEEN NODES------------------
 		if(properties.getGrav_influence() == GravitationalInfluence.ALL || properties.getGrav_influence() == GravitationalInfluence.IS_ATTRACTED) {
 			for (Node node : available_nodes) {
 				if(node == this) continue;
@@ -135,6 +143,7 @@ public class Node {
 			}
 		}
 		
+		//----------------ELEC CHARGE ------------------
 		if(charge != 0 && (properties.getCharge_influence() == ChargeInfluence.ALL || properties.getCharge_influence() == ChargeInfluence.IS_ATTRACTED)) {
 			for (Node node : available_nodes) {
 				if(properties.getCharge_influence() == ChargeInfluence.DISABLE || properties.getCharge_influence() == ChargeInfluence.IS_ATTRACTED || node == this || node.charge == 0)continue;
@@ -156,6 +165,7 @@ public class Node {
 			}
 		}
 		
+		//----------------PLAYER COLLISION------------------
 		if(properties.getPlayer_collision() == PlayerCollision.ENABLE) {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if(player.getWorld() != this.getPosition().getWorld()) continue;
@@ -170,6 +180,54 @@ public class Node {
 			}
 		}
 		
+		//----------------PLAYER ATTRACTORS FORCES------------------
+		if(!(properties.getPlayer_force() == PlayerForce.DISABLE || properties.getPlayer_force() == PlayerForce.STAY)) {
+			List<Player> player_allowed = new ArrayList<Player>();
+			
+			for (Player player : this.getPosition().getWorld().getPlayers()) {
+				if(properties.getPlayer_force() == PlayerForce.ALL) {
+					player_allowed.addAll(this.getPosition().getWorld().getPlayers());
+					break;
+				}
+				if(this.getPlayer_list().contains(player.getUniqueId())) {
+					if(properties.getPlayer_force() == PlayerForce.WHITELIST)player_allowed.add(player);
+				}else {
+					if(properties.getPlayer_force() == PlayerForce.BLACKLIST)player_allowed.add(player);
+				}
+			}
+			
+			for (Player player : player_allowed) {
+				if(properties.getPlayer_force().force_type == null)break;
+				if(player.getGameMode() == GameMode.SPECTATOR) continue;
+				
+				Vector force = player.getLocation().clone().subtract(this.getPosition().clone()).toVector();
+				
+				double distance_internodes = player.getLocation().distance(this.getPosition());
+				if(distance_internodes > properties.getPlayer_force().max_distance) continue;
+				
+				double coef = properties.getPlayer_force().intensity;
+				
+					if(distance_internodes <= properties.getPlayer_force().min_distance) distance_internodes = properties.getPlayer_force().min_distance;
+					
+					if(properties.getPlayer_force().force_type == PlayerForce_Type.INVERT_LINEAR) {
+						coef = 1/Math.pow(distance_internodes,1);
+					}else if(properties.getPlayer_force().force_type == PlayerForce_Type.INVERT_SQUARE) {
+						coef = 1/Math.pow(distance_internodes,2);
+					}else if(properties.getPlayer_force().force_type == PlayerForce_Type.LINEAR) {
+						coef = Math.pow(distance_internodes,1);
+					}else if(properties.getPlayer_force().force_type == PlayerForce_Type.SQUARE) {
+						coef = Math.pow(distance_internodes,2);
+					}
+					
+					if(coef > properties.getPlayer_force().max_intensity) coef = properties.getPlayer_force().max_intensity;
+					
+				force.normalize().multiply(coef);
+				System.out.println(coef);
+				result.add(force);
+			}
+		}
+		
+		//----------------FIELDS------------------
 		if(getProperties().getField_influence() == FieldsInfluence.ENABLE)
 		for (Field field : PhysicEngine.getFields()) {
 			if(field.getProperties().getInteractWthNode() != NodeInteraction.FORCE) continue;
@@ -185,7 +243,14 @@ public class Node {
 		
 		Location center = calculateAbsolutePosition().toLocation(this.getPosition().getWorld()).clone();
 		
+		
+		if(material.particle_type != null) {
+			if(material.particle_type == Particle.REDSTONE)this.position.getWorld().spawnParticle(material.particle_type, center , 1, 0D, 0D, 0D, 0, material.particle_option, true);
+			else this.position.getWorld().spawnParticle(material.particle_type, center, 1, 0, 0, 0, 0, null, true);
+		}
+		
 		if(render_entity == null) {
+			if(Double.isNaN(center.getX())) {this.delete(); if(this.render_entity != null)render_entity.remove(); return;}
 			if(material.texture instanceof BlockData) {
 			render_entity = (BlockDisplay) center.getWorld().spawn(center, BlockDisplay.class, display -> {
 			
@@ -233,9 +298,15 @@ public class Node {
 		return;
 		}
 		
-		if(material.texture instanceof ItemStack) {render_entity.teleport(center.setDirection(getVelocity().clone().multiply(-1)));}
-		else render_entity.teleport(center.setDirection(getVelocity()));
-		render_entity.setVelocity(getVelocity());
+		try {
+			Vector direction = getVelocity().clone();
+			if(direction.length() == 0) direction = new Vector(0,1,0);
+			if(material.texture instanceof ItemStack) {render_entity.teleport(center.setDirection(direction.clone().multiply(-1)));}
+			else render_entity.teleport(center.setDirection(direction));
+			render_entity.setVelocity(getVelocity());
+		}catch (Exception e) {
+			this.delete();
+		}
 		
 	}
 	
@@ -381,6 +452,15 @@ public class Node {
 	public void setCharge(double charge) {
 		this.charge = charge;
 	}
+
+	public List<UUID> getPlayer_list() {
+		return player_list;
+	}
+
+	public void setPlayer_list(List<UUID> player_list) {
+		this.player_list = player_list;
+	}
+	
 	
 	
 	

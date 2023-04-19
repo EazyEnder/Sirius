@@ -15,7 +15,8 @@ package fr.eazyender.physicengine.nodes;
  * -{@link GravitationalInfluence} : If the node is attracted by other nodes and/or if the node can attract others using her mass<br />
  * -{@link ChargeInfluence} : Same as Grav<br />
  * -{@link FieldsInfluence} : If fields can move the node<br />
- * -{@link NodeRange} : What is the list of nodes that grav (influence) force / charge force (and other stuff that interacts with other nodes) interacts with.
+ * -{@link NodeRange} : What is the list of nodes that grav (influence) force / charge force (and other stuff that interacts with other nodes) interacts with.<br />
+ * -{@link PlayerForce} : If a note is attracted by players. To change how the force is applied , change the "force_type" object in the enum<br />
  */
 public class NodeProperties {
 	
@@ -30,6 +31,7 @@ public class NodeProperties {
 	private ChargeInfluence charge_influence = ChargeInfluence.DISABLE;
 	private FieldsInfluence field_influence = FieldsInfluence.DISABLE;
 	private NodeRange node_selection = NodeRange.ALL;
+	private PlayerForce player_force = PlayerForce.DISABLE;
 	
 	public NodeProperties() {}
 	
@@ -94,8 +96,6 @@ public class NodeProperties {
 		this.ghost_attribute = ghost_attribute;
 	}
 	
-	
-
 	public ChargeInfluence getCharge_influence() {
 		return charge_influence;
 	}
@@ -120,6 +120,14 @@ public class NodeProperties {
 		this.player_collision = player_collision;
 	}
 	
+	public PlayerForce getPlayer_force() {
+		return player_force;
+	}
+
+	public void setPlayer_force(PlayerForce player_force) {
+		this.player_force = player_force;
+	}
+
 	public NodeRange getNode_selection() {
 		return node_selection;
 	}
@@ -133,6 +141,20 @@ public class NodeProperties {
 //----------------------------------------------------------
 
 
+	public static enum PlayerForce {
+		ALL, WHITELIST, BLACKLIST, STAY, DISABLE;
+		PlayerForce_Type force_type = PlayerForce_Type.CONSTANT;
+		double intensity = 1;
+		double max_intensity = 5;
+		double min_distance = 0.05;
+		// =0 for infinity
+		double max_distance = 50;
+		enum PlayerForce_Type {
+			CONSTANT, INVERT_LINEAR, INVERT_SQUARE, LINEAR, SQUARE;
+		}
+			
+	}
+	
 	public static enum NodeRange { 
 		ALL, QUADTREE_NEIHBORS_AND_MEANNODES, QUADTREE_PARENT_AND_MEANNODES, QUADTREE_NEIGHBORS, QUADTREE_PARENT, NODE_PARENT;
 	}

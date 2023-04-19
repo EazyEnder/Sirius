@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import fr.eazyender.physicengine.PhysicEngine;
@@ -18,6 +20,7 @@ import fr.eazyender.physicengine.links.Connector;
 import fr.eazyender.physicengine.nodes.Node;
 import fr.eazyender.physicengine.nodes.NodeProperties.FieldsInfluence;
 import fr.eazyender.physicengine.nodes.NodeProperties.Ghost;
+import fr.eazyender.physicengine.nodes.NodeProperties.PlayerForce;
 import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class VerletLoop {
@@ -103,8 +106,23 @@ public class VerletLoop {
 		
 		//Verif
 		for (Node node : PhysicEngine.nodes.getAllLayeredNodes()) {
+			
+			if(node.getProperties().getPlayer_force() == PlayerForce.STAY) {
+				if(!node.getPlayer_list().isEmpty()) {
+					Player player = Bukkit.getPlayer(node.getPlayer_list().get(0));
+					if(player != null) {
+						node.setPosition(player.getLocation());
+					}
+				}
+			}
+			
 			if(node.getVelocity().length() > 1000) {
 				System.out.println("[SIRIUS]" + LangManager.getText("QT_ERROR_NODE_SPEED_LIMIT"));
+				node.delete();
+			}
+			
+			if(Double.isNaN(node.getPosition().getX()) || Double.isNaN(node.getPosition().getY()) || Double.isNaN(node.getPosition().getZ())) {
+				System.out.println("[SIRIUS]" + LangManager.getText("QT_ERROR_NODE_POSITION_NAN"));
 				node.delete();
 			}
 		}

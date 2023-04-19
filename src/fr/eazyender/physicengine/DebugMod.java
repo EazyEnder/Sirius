@@ -15,7 +15,7 @@ import fr.eazyender.physicengine.nodes.NodeProperties.Static;
 
 public class DebugMod {
 	
-	public static boolean drawingEnabled = true;
+	public static boolean drawingEnabled = false;
 	private static List<Connector> connectors = PhysicEngine.getConnectors();
 	
 	
