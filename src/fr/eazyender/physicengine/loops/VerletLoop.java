@@ -1,5 +1,6 @@
 package fr.eazyender.physicengine.loops;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +55,16 @@ public class VerletLoop {
 			Vector acceleration = node.applyForces(delta_pos.clone().multiply(1/dt)).multiply(1/node.getMass());
 			
 			Vector velocity_fields = new Vector(0,0,0);
-			if(node.getProperties().getField_influence() == FieldsInfluence.ENABLE)
-			for (Field field : PhysicEngine.getFields()) {
+			List<Field> fields_selection = new ArrayList<Field>();
+			if(node.getProperties().getField_influence() == FieldsInfluence.ALL) fields_selection.addAll(PhysicEngine.getFields());
+			else if(node.getProperties().getField_influence() == FieldsInfluence.SELECTION && node.getCustom_fields() != null) fields_selection.addAll(node.getCustom_fields());
+			for (Field field : fields_selection) {
 				if(field.getProperties().getInteractWthNode() != NodeInteraction.VELOCITY) continue;
 				velocity_fields.add(field.getField().calc(pos));
 				if(pos.distance(old_pos) > 0.05)velocity_fields.subtract(field.getField().calc(old_pos));
 			}
+
+			
 			delta_pos.add(velocity_fields.multiply(dt));
 			
 			Vector new_pos = pos.clone().add(delta_pos.multiply(1).add(acceleration.multiply(dt*dt)));

@@ -38,6 +38,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 	
 	private static final String prefix = PhysicEngine.text_prefix;
 	private static final String command_name = "/sirius";
+	public static boolean renderNode = true;
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String arg2, String[] args) {
@@ -55,11 +56,15 @@ public class CommandPhysicEngine  implements CommandExecutor {
 					}else if(args[1].toUpperCase().equalsIgnoreCase("OFF")) {
 						DebugMod.drawingEnabled = false;
 						p.sendMessage(prefix+LangManager.getText("CMD_DEBUGMOD_DISABLE"));
+					}else if(args[1].toUpperCase().equalsIgnoreCase("RENDER")) {
+						renderNode = !renderNode;
+						if(renderNode) p.sendMessage(prefix+LangManager.getText("CMD_DEBUGMOD_RENDERON"));
+						else p.sendMessage(prefix+LangManager.getText("CMD_DEBUGMOD_RENDEROFF"));
 					}else {
-						p.sendMessage(prefix+"Usage : "+command_name+" debug {ON/OFF}");
+						p.sendMessage(prefix+"Usage : "+command_name+" debug {ON/OFF/RENDER}");
 					}
 				}else {
-					p.sendMessage(prefix+"Usage : "+command_name+" debug {ON/OFF}");
+					p.sendMessage(prefix+"Usage : "+command_name+" debug {ON/OFF/RENDER}");
 				}
 				
 			}
@@ -76,7 +81,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 				if(args.length > 1) {
 					if(args[1].contentEquals("field_node")) {
 						NodeProperties props = new NodeProperties();
-						props.setField_influence(FieldsInfluence.ENABLE);
+						props.setField_influence(FieldsInfluence.ALL);
 						props.setDrag_force(DragForce.ENABLE);
 						Node node = new Node(p.getLocation(),new Vector(0,0,0),1,props);
 						
@@ -99,7 +104,7 @@ public class CommandPhysicEngine  implements CommandExecutor {
 						node.setMaterial(n_mat);
 						NodeProperties props_child = new NodeProperties();
 						props_child.setNode_selection(NodeRange.NODE_PARENT);
-						props_child.setField_influence(FieldsInfluence.ENABLE);
+						props_child.setField_influence(FieldsInfluence.ALL);
 						
 						for (int i = 0; i < 4; i++) {
 							Node node_child = new Node((new Vector(-0.1 - Math.random()*1.5, 0, -0.1 - Math.random()*1.5)).toLocation(p.getWorld()), new Vector(0,0,0), 1, props_child);

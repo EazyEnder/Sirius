@@ -165,10 +165,12 @@ public class NodeProperties {
 	
 	public static enum GravitationalForce {
 		ENABLE, DISABLE;
+		double gravity_constant = 1;
 	}
 	
 	public static enum DragForce {
 		ENABLE, DISABLE;
+		double drag_coef = -0.25;
 	}
 	
 	public static enum Static{
@@ -177,6 +179,7 @@ public class NodeProperties {
 	
 	public static enum PlayerCollision {
 		ENABLE, DISABLE;
+		double player_hitbox_distance = 0.75;
 	}
 	
 	public static enum Ghost {
@@ -189,14 +192,18 @@ public class NodeProperties {
 	
 	public static enum GravitationalInfluence{
 		DISABLE, ATTRACT_OTHER, IS_ATTRACTED, ALL;
+		double gravitationnal_constant = 1;
+		double min_distance = 0.1;
 	}
 	
 	public static enum ChargeInfluence{
 		DISABLE, ATTRACT_OTHER, IS_ATTRACTED, ALL;
+		double min_distance = 0.1;
+		double max_intensity = 5;
 	}
 	
 	public static enum FieldsInfluence{
-		DISABLE, ENABLE;
+		ALL, SELECTION, DISABLE;
 	}
 
 }

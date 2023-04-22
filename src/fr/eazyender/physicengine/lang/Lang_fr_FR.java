@@ -22,6 +22,8 @@ public class Lang_fr_FR {
 		
 		words.put("CMD_DEBUGMOD_ENABLE", "Le mode de debug a été activé.");
 		words.put("CMD_DEBUGMOD_DISABLE", "Le mode de debug a été désactivé.");
+		words.put("CMD_DEBUGMOD_RENDEROFF", "le rendu des noeuds a été désactivé.");
+		words.put("CMD_DEBUGMOD_RENDERON", "le rendu des noeuds a été activé.");
 		words.put("CMD_SIMU_ALREADY_PAUSED", "La simulation est déjà en pause. Faites {1} resume ,pour relancer la simulation.");
 		words.put("CMD_SIMU_PAUSE", "La simulation a été mise en pause.");
 		words.put("CMD_SIMU_ALREADY_RESUMED", "La simulation est déjà en route. Faites {1} pause ,pour mettre en pause la simulation.");

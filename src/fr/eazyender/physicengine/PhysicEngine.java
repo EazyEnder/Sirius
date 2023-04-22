@@ -58,6 +58,8 @@ public class PhysicEngine  extends JavaPlugin{
 		
 		nodes.region.setWorld(Bukkit.getWorlds().get(0));
 		
+		this.getServer().getPluginManager().registerEvents(new UtilsListener(), this);
+		
 		this.getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 		
 		

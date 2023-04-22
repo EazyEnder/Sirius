@@ -23,6 +23,7 @@ import org.joml.Vector3f;
 
 import fr.eazyender.physicengine.PhysicEngine;
 import fr.eazyender.physicengine.PhysicalConstants;
+import fr.eazyender.physicengine.events.NodeRenderEvent;
 import fr.eazyender.physicengine.events.NodeTriggerEvent;
 import fr.eazyender.physicengine.fields.Field;
 import fr.eazyender.physicengine.fields.FieldProperties.NodeInteraction;
@@ -57,6 +58,8 @@ public class Node {
 	private Object host;
 	
 	private	List<Node> childs = new CopyOnWriteArrayList<Node>(); 
+	
+	private List<Field> custom_fields = new CopyOnWriteArrayList<Field>();
 	
 	
 	public boolean isDeleted = false;
@@ -125,8 +128,8 @@ public class Node {
 		}
 		
 		//----------------GENERIC FORCES------------------
-		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-PhysicalConstants.gravity_constant * mass,0));
-		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-PhysicalConstants.DragCoef*velocity.clone().dot(velocity.clone()));
+		if(properties.getGrav_force() == GravitationalForce.ENABLE) result.add(new Vector(0,-properties.getGrav_force().gravity_constant * mass,0));
+		if(properties.getDrag_force() == DragForce.ENABLE) result.multiply(-properties.getDrag_force().drag_coef*velocity.clone().dot(velocity.clone()));
 		
 		//----------------GRAV FORCE BETWEEN NODES------------------
 		if(properties.getGrav_influence() == GravitationalInfluence.ALL || properties.getGrav_influence() == GravitationalInfluence.IS_ATTRACTED) {
@@ -134,11 +137,11 @@ public class Node {
 				if(node == this) continue;
 				if(node.getProperties().getGrav_influence() == GravitationalInfluence.DISABLE || node.getProperties().getGrav_influence() == GravitationalInfluence.IS_ATTRACTED)continue;
 				Vector force = node.getPosition().clone().subtract(this.getPosition().clone()).toVector();
-				force.normalize().multiply(PhysicalConstants.gravitationnal_constant * node.mass*mass);
+				force.normalize().multiply(properties.getGrav_influence().gravitationnal_constant * node.mass*mass);
 				
 				double distance_internodes = node.getPosition().distance(this.getPosition());
 				if(distance_internodes > 50) continue;
-				if(distance_internodes <= 0.1) distance_internodes = 0.1;
+				if(distance_internodes <= properties.getGrav_influence().min_distance) distance_internodes = properties.getGrav_influence().min_distance;
 				result.add(force.multiply(1/Math.pow(distance_internodes,2)));
 			}
 		}
@@ -155,9 +158,9 @@ public class Node {
 				
 				double distance_internodes = node.getPosition().distance(this.getPosition());
 				if(distance_internodes > 50) continue;
-				if(distance_internodes <= 0.1) distance_internodes = 0.1;
+				if(distance_internodes <=  properties.getCharge_influence().min_distance) distance_internodes = properties.getCharge_influence().min_distance;
 				double coef = 1/Math.pow(distance_internodes,2);
-				if(coef > 3) coef = 3;
+				if(coef > properties.getCharge_influence().max_intensity) coef = properties.getCharge_influence().max_intensity;
 				
 				force.multiply(coef);
 				result.add(force);
@@ -172,7 +175,7 @@ public class Node {
 				if(player.getGameMode() == GameMode.SPECTATOR) continue;
 				
 				Location pos_player = player.getLocation().clone().add(0,1,0);
-				if(pos_player.toVector().distance(calculateAbsolutePosition()) < 0.75){
+				if(pos_player.toVector().distance(calculateAbsolutePosition()) < properties.getPlayer_collision().player_hitbox_distance){
 					Vector delta_hit = calculateAbsolutePosition().clone().subtract(pos_player.toVector());
 					delta_hit.normalize().multiply(5*(1/pos_player.distance(this.position)));
 					result.add(delta_hit);
@@ -228,8 +231,10 @@ public class Node {
 		}
 		
 		//----------------FIELDS------------------
-		if(getProperties().getField_influence() == FieldsInfluence.ENABLE)
-		for (Field field : PhysicEngine.getFields()) {
+		List<Field> fields_selection = new ArrayList<Field>();
+		if(getProperties().getField_influence() == FieldsInfluence.ALL) fields_selection.addAll(PhysicEngine.getFields());
+		else if(getProperties().getField_influence() == FieldsInfluence.SELECTION && getCustom_fields() != null) fields_selection.addAll(getCustom_fields());
+		for (Field field : fields_selection) {
 			if(field.getProperties().getInteractWthNode() != NodeInteraction.FORCE) continue;
 			result.add(field.getField().calc(position.toVector()));
 		}
@@ -239,7 +244,17 @@ public class Node {
 	
 	public void render() {
 		
+		NodeRenderEvent event = new NodeRenderEvent(this);
+		Bukkit.getPluginManager().callEvent(event);
+		if(event.isCancelled()) {
+			if(render_entity != null) render_entity.remove();
+			render_entity = null;
+			return;
+		}
+		
 		if(material == null)return;
+		
+		
 		
 		Location center = calculateAbsolutePosition().toLocation(this.getPosition().getWorld()).clone();
 		
@@ -460,6 +475,16 @@ public class Node {
 	public void setPlayer_list(List<UUID> player_list) {
 		this.player_list = player_list;
 	}
+
+	public List<Field> getCustom_fields() {
+		return custom_fields;
+	}
+
+	public void setCustom_fields(List<Field> custom_fields) {
+		this.custom_fields = custom_fields;
+	}
+	
+	
 	
 	
 	
